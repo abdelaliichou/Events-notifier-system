@@ -99,19 +99,6 @@ func testingModels() {
 
 }
 
-func staticVariables() {
-	fmt.Println("App Name:", models.AppName)
-	fmt.Println("Version:", models.Version)
-
-	fmt.Println("CERRA Mode:", models.CalendarURL("5",
-		models.M1_GROUPE_3_OPTION))
-
-	fmt.Println("CERRA Mode:", models.CalendarURL("2",
-		models.M1_GROUPE_1_lANGUE,
-		models.M1_GROUPE_1_lANGUE,
-		models.M1_GROUPE_1_lANGUE))
-}
-
 func init() {
 
 	db, err := helpers.OpenDB()
@@ -126,18 +113,8 @@ func init() {
 
 	// Define table schemas for Resource and Alert
 	schemes := []string{
-		`CREATE TABLE IF NOT EXISTS resources (
-			id TEXT PRIMARY KEY NOT NULL UNIQUE,
-			ucaID INTEGER NOT NULL,
-			name TEXT NOT NULL
-		);`,
-		`CREATE TABLE IF NOT EXISTS alerts (
-			id TEXT PRIMARY KEY NOT NULL UNIQUE,
-			email TEXT NOT NULL,
-			is_all BOOLEAN NOT NULL,
-			resourceID TEXT NULL,
-			FOREIGN KEY (resourceID) REFERENCES resources(id) ON DELETE SET NULL
-		);`,
+		models.RESOURCES_TABLE,
+		models.ALERTS_TABLE,
 	}
 
 	// Execute each table creation query

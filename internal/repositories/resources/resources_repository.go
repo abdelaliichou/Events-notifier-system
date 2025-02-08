@@ -13,7 +13,7 @@ func GetAllResources() ([]*models.Resource, error) {
 	}
 	defer helpers.CloseDB(db)
 
-	query := "SELECT * FROM resources"
+	query := models.GET_ALL_RESOURCES
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func GetResourceById(id uuid.UUID) (*models.Resource, error) {
 	defer helpers.CloseDB(db) // Close DB connection after query
 
 	var resource models.Resource
-	query := "SELECT * FROM resources WHERE id=?"
+	query := models.GET_RESOURCE
 	row := db.QueryRow(query, id.String())
 
 	err = row.Scan(&resource.Id, &resource.UcaID, &resource.Name)
@@ -60,7 +60,7 @@ func CreateResource(resource models.Resource) error {
 	}
 	defer helpers.CloseDB(db)
 
-	query := "INSERT INTO resources (id, ucaID, name) VALUES (?, ?, ?)"
+	query := models.CREAT_RESOURCE
 	_, err = db.Exec(query, resource.Id.String(), resource.UcaID, resource.Name)
 
 	return err
@@ -74,7 +74,7 @@ func UpdateResource(resource *models.Resource) error {
 	}
 	defer helpers.CloseDB(db)
 
-	query := "UPDATE resources SET ucaID=?, name=? WHERE id=?"
+	query := models.UPDATE_RESOURCE
 	_, err = db.Exec(query, resource.UcaID, resource.Name, resource.Id.String())
 
 	return err
@@ -89,7 +89,7 @@ func DeleteResource(id uuid.UUID) error {
 	defer helpers.CloseDB(db)
 
 	// Delete the resource based on the ID
-	query := "DELETE FROM resources WHERE id=?"
+	query := models.DELETE_RESOURCE
 	result, err := db.Exec(query, id.String())
 	if err != nil {
 		return err

@@ -15,7 +15,7 @@ func GetAllAlerts() ([]*models.Alert, error) {
 	// Ensure the db connection is closed when the function returns
 	defer helpers.CloseDB(db)
 
-	rows, err := db.Query("SELECT * FROM alerts")
+	rows, err := db.Query(models.GET_ALL_ALERTS)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func GetAlertById(id uuid.UUID) (*models.Alert, error) {
 	defer helpers.CloseDB(db)
 
 	var alert models.Alert
-	query := "SELECT * FROM alerts WHERE id = ?"
+	query := models.GET_ALERT
 	row := db.QueryRow(query, id.String())
 
 	err = row.Scan(&alert.Id, &alert.Email, &alert.IsAll, &alert.ResourceID)
@@ -67,10 +67,7 @@ func UpdateAlert(alert models.Alert) error {
 	}
 	defer helpers.CloseDB(db)
 
-	result, err := db.Exec(`
-		UPDATE alerts 
-		SET email = ?, is_all = ?, resourceID = ? 
-		WHERE id = ?`,
+	result, err := db.Exec(models.UPDATE_ALERT,
 		alert.Email, alert.IsAll, alert.ResourceID, alert.Id.String(),
 	)
 
@@ -97,11 +94,8 @@ func CreateAlert(alert models.Alert) error {
 	}
 	defer helpers.CloseDB(db)
 
-	_, err = db.Exec(`
-		INSERT INTO alerts (id, email, is_all, resourceID) 
-		VALUES (?, ?, ?, ?)`,
-		alert.Id.String(), alert.Email, alert.IsAll, alert.ResourceID,
-	)
+	_, err = db.Exec(models.CREAT_ALERT,
+		alert.Id.String(), alert.Email, alert.IsAll, alert.ResourceID)
 
 	return err
 }
@@ -115,7 +109,7 @@ func DeleteAlertById(id uuid.UUID) error {
 	defer helpers.CloseDB(db)
 
 	// Delete the alert based on the ID
-	result, err := db.Exec("DELETE FROM alerts WHERE id = ?", id.String())
+	result, err := db.Exec(models.DELETE_ALERT, id.String())
 	if err != nil {
 		return err
 	}

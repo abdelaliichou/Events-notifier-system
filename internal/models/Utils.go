@@ -14,6 +14,31 @@ const (
 	M1_GROUPE_3_OPTION = "62962"
 	M1_GROUPE_OPTION   = "62090"
 	M1_TUTORAT_L2      = "56529"
+	RESOURCES_TABLE    = `CREATE TABLE IF NOT EXISTS resources (
+							id TEXT PRIMARY KEY NOT NULL UNIQUE,
+							ucaID INTEGER NOT NULL,
+							name TEXT NOT NULL
+						);`
+	ALERTS_TABLE = `CREATE TABLE IF NOT EXISTS alerts (
+							id TEXT PRIMARY KEY NOT NULL UNIQUE,
+							email TEXT NOT NULL,
+							is_all BOOLEAN NOT NULL,
+							resourceID TEXT NULL,
+							FOREIGN KEY (resourceID) REFERENCES resources(id) ON DELETE SET NULL
+						);`
+	UPDATE_ALERT = `UPDATE alerts 
+					SET email = ?, is_all = ?, resourceID = ? 
+					WHERE id = ?`
+	CREAT_ALERT = `INSERT INTO alerts (id, email, is_all, resourceID) 
+					VALUES (?, ?, ?, ?)`
+	DELETE_ALERT      = "DELETE FROM alerts WHERE id = ?"
+	GET_ALL_ALERTS    = "SELECT * FROM alerts"
+	GET_ALERT         = "SELECT * FROM alerts WHERE id = ?"
+	GET_ALL_RESOURCES = "SELECT * FROM resources"
+	GET_RESOURCE      = "SELECT * FROM resources WHERE id=?"
+	CREAT_RESOURCE    = "INSERT INTO resources (id, ucaID, name) VALUES (?, ?, ?)"
+	UPDATE_RESOURCE   = "UPDATE resources SET ucaID=?, name=? WHERE id=?"
+	DELETE_RESOURCE   = "DELETE FROM resources WHERE id=?"
 )
 
 // Function to generate calendar URL with multiple resource IDs
@@ -25,38 +50,3 @@ func CalendarURL(nbWeeks string, RESOURCE_ID ...string) string {
 	return "https://edt.uca.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=" + joinedResources +
 		"&projectId=2&calType=ical&" + nbWeeks + "=8&displayConfigId=128"
 }
-
-// ICalendar format
-/*
-BEGIN:VCALENDAR                 # début du calendrier
-METHOD:PUBLISH                  # attributs du calendrier
-PRODID:-//ADE/version 6.0
-VERSION:2.0
-CALSCALE:GREGORIAN
-BEGIN:VEVENT                    # début d'un event
-DTSTAMP:20250111T152020Z        # attributs d'un event
-DTSTART:20250220T070000Z
-DTEND:20250220T090000Z
-SUMMARY:*Option CM Méthodes approchées
-LOCATION:IS_A104
-DESCRIPTION:\n\nMASTER 1 INFO\nNGUYEN MINH HIEU\n\n(Updated :20/11/2024 1
-8:01)                          # ligne multiple pour plus de données commençant par un espace
-UID:ADE60323032342d323032352d5543412d33343338392d302d34
-CREATED:19700101T000000Z
-LAST-MODIFIED:20241120T170100Z
-SEQUENCE:2141518841
-END:VEVENT                      # fin d'un event
-BEGIN:VEVENT                    # début d'un event
-DTSTAMP:20250113T153810Z
-DTSTART:20250114T070000Z
-DTEND:20250114T090000Z
-SUMMARY:CM Big Data Infrastructure
-LOCATION:IS_E005_Amphi Garcia
-DESCRIPTION:\n\nMASTER 1 INFO\nTOUMANI FAROUK\n\n(Updated :20/11/2024 17:
-UID:ADE60323032342d323032352d5543412d34313837392d302d30
-CREATED:19700101T000000Z
-LAST-MODIFIED:20241120T160400Z
-SEQUENCE:2141518784
-END:VEVENT                      # fin d'un event
-END:VCALENDAR                   # fin du calendrier
-*/
