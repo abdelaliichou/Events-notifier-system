@@ -50,9 +50,10 @@ func testingModels() {
 
 	// Création d'une alerte sans ressource
 	alertWithoutResource := models.Alert{
-		Id:    &resourceID,
-		Email: "user@example.com",
-		All:   true,
+		Id:         &resourceID,
+		Email:      "user@example.com",
+		All:        true,
+		ResourceID: nil,
 	}
 
 	// Sérialisation JSON
@@ -80,20 +81,40 @@ func staticVariables() {
 }
 
 func init() {
+
 	db, err := helpers.OpenDB()
 	if err != nil {
-		logrus.Fatalf("error while opening database : %s", err.Error())
+		logrus.Fatalf("Error while opening database: %s", err.Error())
 	}
+
+	// Activer explicitement les FOREIGN KEYS ( Ne faites pas trop confiance aux constraints avec SQLite )
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		logrus.Fatalln("Could not enable foreign key support: " + err.Error())
+	}
+
+	// Define table schemas for Resource and Alert
 	schemes := []string{
-		`CREATE TABLE IF NOT EXISTS collections (
-			id VARCHAR(255) PRIMARY KEY NOT NULL UNIQUE,
-			content VARCHAR(255) NOT NULL
+		`CREATE TABLE IF NOT EXISTS resources (
+			id TEXT PRIMARY KEY NOT NULL UNIQUE,
+			ucaID INTEGER NOT NULL,
+			name TEXT NOT NULL
+		);`,
+		`CREATE TABLE IF NOT EXISTS alerts (
+			id TEXT PRIMARY KEY NOT NULL UNIQUE,
+			email TEXT NOT NULL,
+			all BOOLEAN NOT NULL,
+			resourceID TEXT NULL,
+			FOREIGN KEY (resourceID) REFERENCES resources(id) ON DELETE SET NULL
 		);`,
 	}
+
+	// Execute each table creation query
 	for _, scheme := range schemes {
 		if _, err := db.Exec(scheme); err != nil {
-			logrus.Fatalln("Could not generate table ! Error was : " + err.Error())
+			logrus.Fatalln("Could not create table! Error: " + err.Error())
 		}
 	}
+
 	helpers.CloseDB(db)
+
 }
