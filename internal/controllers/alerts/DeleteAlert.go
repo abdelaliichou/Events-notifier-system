@@ -5,17 +5,19 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"middleware/example/internal/models"
-	"middleware/example/internal/services/collections"
+	services "middleware/example/internal/services/alerts"
 	"net/http"
 )
 
-func DeleteCollection(w http.ResponseWriter, r *http.Request) {
+// DeleteAlert handles the deletion of an alert
+func DeleteAlert(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	collectionId, _ := ctx.Value("collectionId").(uuid.UUID)
+	alertID, _ := ctx.Value("alertID").(uuid.UUID)
 
-	collection, err := collections.GetCollectionById(collectionId)
+	// Call the service layer to delete the alert
+	err := services.DeleteAlert(alertID)
 	if err != nil {
-		logrus.Errorf("error : %s", err.Error())
+		logrus.Errorf("Error: %s", err.Error())
 		customError, isCustom := err.(*models.CustomError)
 		if isCustom {
 			w.WriteHeader(customError.Code)
@@ -27,8 +29,8 @@ func DeleteCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return success response (200 OK)
 	w.WriteHeader(http.StatusOK)
-	body, _ := json.Marshal(collection)
+	body, _ := json.Marshal(map[string]string{"message": "Alert deleted successfully"})
 	_, _ = w.Write(body)
-	return
 }

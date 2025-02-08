@@ -5,17 +5,19 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"middleware/example/internal/models"
-	"middleware/example/internal/services/collections"
+	services "middleware/example/internal/services/alerts"
 	"net/http"
 )
 
-func PutCollection(w http.ResponseWriter, r *http.Request) {
+// GetAlert retrieves an alert from the database using the Alert ID from the context
+func GetAlert(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	collectionId, _ := ctx.Value("collectionId").(uuid.UUID)
+	alertID, _ := ctx.Value("alertID").(uuid.UUID)
 
-	collection, err := collections.GetCollectionById(collectionId)
+	// Fetch the alert from the service layer
+	alert, err := services.GetAlertById(alertID)
 	if err != nil {
-		logrus.Errorf("error : %s", err.Error())
+		logrus.Errorf("Error: %s", err.Error())
 		customError, isCustom := err.(*models.CustomError)
 		if isCustom {
 			w.WriteHeader(customError.Code)
@@ -27,8 +29,8 @@ func PutCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return the alert details as JSON
 	w.WriteHeader(http.StatusOK)
-	body, _ := json.Marshal(collection)
+	body, _ := json.Marshal(alert)
 	_, _ = w.Write(body)
-	return
 }

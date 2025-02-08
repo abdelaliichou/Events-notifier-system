@@ -3,29 +3,61 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
+	alertsHandler "middleware/example/internal/controllers/alerts"
+	resourcesHandler "middleware/example/internal/controllers/resources"
 	"middleware/example/internal/helpers"
 	"middleware/example/internal/models"
-	_ "middleware/example/internal/models"
+	"net/http"
 )
 
 func main() {
-	/*
-		r := chi.NewRouter()
 
-		r.Route("/collections", func(r chi.Router) {
-			r.Get("/", collections.GetCollections)
-			r.Route("/{id}", func(r chi.Router) {
-				r.Use(collections.Ctx)
-				r.Get("/", collections.GetCollection)
-			})
+	routes()
+
+}
+
+func routes() {
+
+	r := chi.NewRouter()
+
+	// Middleware for logging and recovery
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// ---------------------- ALERT ROUTES ----------------------
+	r.Route("/alerts", func(r chi.Router) {
+		r.Post("/", alertsHandler.CreateAlert) // Create an alert
+		r.Get("/", alertsHandler.GetAlerts)    // Get all alerts
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(alertsHandler.CtxAlert)            // Middleware to extract alert ID
+			r.Get("/", alertsHandler.GetAlert)       // Get alert by ID
+			r.Put("/", alertsHandler.UpdateAlert)    // Update alert by ID
+			r.Delete("/", alertsHandler.DeleteAlert) // Delete alert by ID
 		})
+	})
 
-		logrus.Info("[INFO] Web server started. Now listening on *:8080")
-		logrus.Fatalln(http.ListenAndServe(":8080", r))
-	*/
-	testingModels()
+	// ---------------------- RESOURCE ROUTES ----------------------
+	r.Route("/resources", func(r chi.Router) {
+		r.Post("/", resourcesHandler.CreateResource) // Create a resource
+		r.Get("/", resourcesHandler.GetAllResources) // Get all resources
+
+		r.Route("/{id}", func(r chi.Router) {
+			r.Use(resourcesHandler.CtxResource)            // Middleware to extract resource ID
+			r.Get("/", resourcesHandler.GetResource)       // Get resource by ID
+			r.Put("/", resourcesHandler.UpdateResource)    // Update resource by ID
+			r.Delete("/", resourcesHandler.DeleteResource) // Delete resource by ID
+		})
+	})
+
+	// Start the server
+	logrus.Info("[INFO] Web server started. Now listening on *:8080")
+	logrus.Fatalln(http.ListenAndServe(":8080", r))
+
 }
 
 func testingModels() {
@@ -44,7 +76,7 @@ func testingModels() {
 	alertWithResource := models.Alert{
 		Id:         &resourceID,
 		Email:      "user@example.com",
-		All:        false,
+		IsAll:      false,
 		ResourceID: &resourceID,
 	}
 
@@ -52,7 +84,7 @@ func testingModels() {
 	alertWithoutResource := models.Alert{
 		Id:         &resourceID,
 		Email:      "user@example.com",
-		All:        true,
+		IsAll:      true,
 		ResourceID: nil,
 	}
 
@@ -102,7 +134,7 @@ func init() {
 		`CREATE TABLE IF NOT EXISTS alerts (
 			id TEXT PRIMARY KEY NOT NULL UNIQUE,
 			email TEXT NOT NULL,
-			all BOOLEAN NOT NULL,
+			is_all BOOLEAN NOT NULL,
 			resourceID TEXT NULL,
 			FOREIGN KEY (resourceID) REFERENCES resources(id) ON DELETE SET NULL
 		);`,

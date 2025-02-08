@@ -16,9 +16,8 @@ type Resource struct {
 	Name  string     `json:"name"`
 }
 type Alert struct {
-	Id    *uuid.UUID `json:"id"`
-	Email string     `json:"email"`
-	All   bool       `json:"all"`
-	//	ResourceID *uuid.UUID `json:"resourceID,omitempty"` // UUID ou NULL (nullable)
+	Id         *uuid.UUID `json:"id"`
+	Email      string     `json:"email"`
+	IsAll      bool       `json:"all"`
 	ResourceID *uuid.UUID `json:"resourceID"` // Always present, but can be null
 }

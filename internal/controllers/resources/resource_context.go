@@ -11,13 +11,14 @@ import (
 	"net/http"
 )
 
-func Ctx(next http.Handler) http.Handler {
+// CtxResource extracts the Resource ID from the URL and adds it to the request context
+func CtxResource(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		collectionId, err := uuid.FromString(chi.URLParam(r, "id"))
+		resourceID, err := uuid.FromString(chi.URLParam(r, "id"))
 		if err != nil {
-			logrus.Errorf("parsing error : %s", err.Error())
+			logrus.Errorf("Parsing error: %s", err.Error())
 			customError := &models.CustomError{
-				Message: fmt.Sprintf("cannot parse id (%s) as UUID", chi.URLParam(r, "id")),
+				Message: fmt.Sprintf("Cannot parse id (%s) as UUID", chi.URLParam(r, "id")),
 				Code:    http.StatusUnprocessableEntity,
 			}
 			w.WriteHeader(customError.Code)
@@ -26,7 +27,8 @@ func Ctx(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "collectionId", collectionId)
+		// Store the resourceID in the request context
+		ctx := context.WithValue(r.Context(), "resourceID", resourceID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
