@@ -14,6 +14,7 @@ const (
 	M1_GROUPE_3_OPTION = "62962"
 	M1_GROUPE_OPTION   = "62090"
 	M1_TUTORAT_L2      = "56529"
+	DB_PATH            = "file:config.db"
 	RESOURCES_TABLE    = `CREATE TABLE IF NOT EXISTS resources (
 							id TEXT PRIMARY KEY NOT NULL UNIQUE,
 							ucaID INTEGER NOT NULL,

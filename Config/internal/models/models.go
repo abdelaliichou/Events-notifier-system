@@ -4,11 +4,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Collection struct {
-	Id      *uuid.UUID `json:"id"`
-	Content string     `json:"content"`
-}
-
 // Resource represent un employ du temps
 type Resource struct {
 	Id    *uuid.UUID `json:"id"`
