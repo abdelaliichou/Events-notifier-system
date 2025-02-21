@@ -7,10 +7,14 @@ import (
 	eventsHandler "middleware/example/internal/controllers/events"
 	"middleware/example/internal/helpers"
 	"middleware/example/internal/models"
+	"middleware/example/internal/mq"
 	"net/http"
 )
 
 func main() {
+
+	// Starting consumer
+	mq.StartStreamConsumer()
 
 	routes()
 

@@ -1,12 +1,19 @@
 package main
 
 import (
+	"Scheduler/models"
+	"Scheduler/mq"
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/zhashkevych/scheduler"
 	"io"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 )
@@ -15,18 +22,35 @@ import (
 
 func main() {
 
-	FetchingFromConfig()
+	// Starting NATS JetStream
+	mq.InitStream()
+
+	schedulingFunctionCall()
 
 }
 
-func FetchingFromConfig() {
+func schedulingFunctionCall() {
+
+	ctx := context.Background()
+	sc := scheduler.NewScheduler()
+	sc.Add(ctx, FetchingFromConfig, time.Second*10)
+
+	// cette partie sert à maintenir le programme en vie, tant qu'il n'a pas reçu de signal os.Interrupt
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+
+	<-quit
+	sc.Stop()
+}
+
+func FetchingFromConfig(_ context.Context) {
 
 	// Make the HTTP GET request
 	var body []byte
-	body = HttpRequest(CONFIG_PATH, false)
+	body = HttpRequest(models.CONFIG_PATH, false)
 
 	// Parse the JSON data into a slice of Resource structs
-	var resources []Resource
+	var resources []models.Resource
 	err := json.Unmarshal(body, &resources)
 	if err != nil {
 		fmt.Println("Error parsing JSON:", err)
@@ -34,7 +58,7 @@ func FetchingFromConfig() {
 	}
 
 	// Print the parsed data
-	fmt.Println("\nGetting all resources from Config : ", CONFIG_PATH)
+	fmt.Println("\nGetting all resources from Config : ", models.CONFIG_PATH)
 	for _, resource := range resources {
 		fmt.Printf("ID: %s, UcaID: %d, Name: %s\n", resource.Id, resource.UcaID, resource.Name)
 	}
@@ -44,23 +68,23 @@ func FetchingFromConfig() {
 
 }
 
-func FetchingFromUCA(resources []Resource) {
+func FetchingFromUCA(resources []models.Resource) {
 
-	fmt.Println("\nURL with all resourceIDs : ", UCA_URL("8", resources))
+	fmt.Println("\nURL with all resourceIDs : ", models.UCA_URL("8", resources))
 
 	for _, resource := range resources {
 
 		// filter resources based on the Name field
 		// filter()
 
-		var customResources []Resource
+		var customResources []models.Resource
 		customResources = append(customResources, resource)
-		url := UCA_URL("8", customResources)
+		url := models.UCA_URL("8", customResources)
 		fmt.Printf("\nURL of resource %d id : %s\n", resource.UcaID, url)
 
 		// doing the request with this particular resourceID
-		uca_resp := HttpRequest(url, true)
-		ParsingEvents(uca_resp)
+		ucaResp := HttpRequest(url, true)
+		ParsingEvents(ucaResp)
 
 	}
 }
@@ -154,14 +178,14 @@ func ParsingEvents(data []byte) {
 		}
 	}
 
-	var structuredEvents []Event
+	var structuredEvents []models.Event
 	for _, event := range eventArray {
 
 		startTime, _ := time.Parse("20060102T150405Z", event["DTSTART"])
 		endTime, _ := time.Parse("20060102T150405Z", event["DTEND"])
 		lastModified, _ := time.Parse("20060102T150405Z", event["LAST-MODIFIED"])
 
-		structuredEvents = append(structuredEvents, Event{
+		structuredEvents = append(structuredEvents, models.Event{
 			Description: event["DESCRIPTION"],
 			Location:    event["LOCATION"],
 			Start:       startTime,
@@ -181,4 +205,19 @@ func ParsingEvents(data []byte) {
 		fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))
 		fmt.Println("-----")
 	}
+
+	// Send into MQ
+	sendEventsToMQ(structuredEvents)
+}
+
+// sendEventsToMQ will send structured events to our producer as a stream to MQ
+func sendEventsToMQ(structuredEvents []models.Event) {
+
+	err := mq.PublishEventsAsStream(structuredEvents)
+	if err != nil {
+		log.Println("Error sending events to MQ:", err)
+		return
+	}
+
+	fmt.Println("All events sent successfully to MQ")
 }
