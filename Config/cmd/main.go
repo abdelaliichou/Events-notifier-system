@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	alertsHandler "middleware/example/internal/controllers/alerts"
 	resourcesHandler "middleware/example/internal/controllers/resources"
@@ -57,45 +54,6 @@ func routes() {
 	// Start the server
 	logrus.Info("[INFO] Web server started. Now listening on *:8080")
 	logrus.Fatalln(http.ListenAndServe(":8080", r))
-
-}
-
-func testingModels() {
-
-	// Création d'un UUID pour la ressource
-	resourceID, _ := uuid.NewV4()
-
-	// Création d'une ressource
-	resource := models.Resource{
-		Id:    &resourceID,
-		UcaID: 12345,
-		Name:  "Salle Informatique",
-	}
-
-	// Création d'une alerte associée à la ressource
-	alertWithResource := models.Alert{
-		Id:         &resourceID,
-		Email:      "user@example.com",
-		IsAll:      false,
-		ResourceID: &resourceID,
-	}
-
-	// Création d'une alerte sans ressource
-	alertWithoutResource := models.Alert{
-		Id:         &resourceID,
-		Email:      "user@example.com",
-		IsAll:      true,
-		ResourceID: nil,
-	}
-
-	// Sérialisation JSON
-	resourceJSON, _ := json.Marshal(resource)
-	alertWithResourceJSON, _ := json.Marshal(alertWithResource)
-	alertWithoutResourceJSON, _ := json.Marshal(alertWithoutResource)
-
-	fmt.Println("Resource JSON:", string(resourceJSON))
-	fmt.Println("Alert (with resource) JSON:", string(alertWithResourceJSON))
-	fmt.Println("Alert (without resource) JSON:", string(alertWithoutResourceJSON))
 
 }
 
