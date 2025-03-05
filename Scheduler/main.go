@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/zhashkevych/scheduler"
 	"io"
 	"log"
@@ -84,7 +85,7 @@ func FetchingFromUCA(resources []models.Resource) {
 
 		// doing the request with this particular resourceID
 		ucaResp := HttpRequest(url, true)
-		ParsingEvents(ucaResp)
+		ParsingEvents(ucaResp, resource.Id)
 
 	}
 }
@@ -128,7 +129,7 @@ func HttpRequest(url string, show bool) []byte {
 	return body
 }
 
-func ParsingEvents(data []byte) {
+func ParsingEvents(data []byte, ResourceID *uuid.UUID) {
 	// create line reader from data
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 
@@ -188,7 +189,10 @@ func ParsingEvents(data []byte) {
 		structuredEvents = append(structuredEvents, models.Event{
 			Description: event["DESCRIPTION"],
 			Location:    event["LOCATION"],
+			UID:         event["UID"],
+			ResourceIDs: []*uuid.UUID{ResourceID},
 			Start:       startTime,
+			Name:        event["SUMMARY"],
 			End:         endTime,
 			LastUpdate:  lastModified,
 		})
@@ -200,6 +204,9 @@ func ParsingEvents(data []byte) {
 		fmt.Printf("Event %d:\n", i+1)
 		fmt.Printf("  Description: %s\n", event.Description)
 		fmt.Printf("  Location: %s\n", event.Location)
+		fmt.Printf("  RESOURCES ID: %s\n", event.ResourceIDs)
+		fmt.Printf("  UID: %s\n", event.UID)
+		fmt.Printf("  NAME: %s\n", event.Name)
 		fmt.Printf("  Start: %s\n", event.Start.Format(time.RFC3339))
 		fmt.Printf("  End: %s\n", event.End.Format(time.RFC3339))
 		fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))

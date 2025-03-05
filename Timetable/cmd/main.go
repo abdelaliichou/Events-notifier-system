@@ -14,7 +14,10 @@ import (
 func main() {
 
 	// Starting consumer
-	mq.StartStreamConsumer()
+	go mq.StartStreamConsumer()
+
+	// Starting producer
+	go mq.InitStream()
 
 	routes()
 

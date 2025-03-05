@@ -1,14 +1,11 @@
 package mq
 
 import (
-	"Scheduler/models"
 	"encoding/json"
 	"fmt"
 	"github.com/nats-io/nats.go"
 	"log"
 )
-
-var jsc nats.JetStreamContext
 
 // InitStream initializes the NATS JetStream connection
 func InitStream() {
@@ -17,51 +14,51 @@ func InitStream() {
 	var err error
 	nc, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
-		log.Fatal("❌ Failed to connect to Scheduler NATS:", err)
+		log.Fatal("❌ Failed to connect to Alerts NATS:", err)
 	}
 
 	// Initialize JetStream context
 	jsc, err = nc.JetStream()
 	if err != nil {
-		log.Fatal("❌ Failed to initialize Scheduler JetStream:", err)
+		log.Fatal("❌ Failed to initialize Alerts JetStream:", err)
 	}
 
 	// Stream doesn't exist, create it
 	_, err = jsc.AddStream(&nats.StreamConfig{
-		Name:     "EVENTS",             // Name of the stream
-		Subjects: []string{"EVENTS.>"}, // Allow any subject under EVENTS
+		Name:     "ALERTS",             // Name of the stream
+		Subjects: []string{"ALERTS.>"}, // Allow any subject under ALERTS
 	})
 	if err != nil {
 		log.Fatal("❌ Failed to create stream:", err)
 	}
 
-	log.Println("✅ Stream EVENTS created successfully")
+	fmt.Println("✅ Stream ALERTS created successfully")
 }
 
 // PublishEventsAsStream Publish a list of events as a stream
-func PublishEventsAsStream(events []models.Event) error {
+func PublishEventsAsStream(eventUIDs []string) error {
 
 	// Convert the whole list to JSON
-	data, err := json.Marshal(events)
+	data, err := json.Marshal(eventUIDs)
 	if err != nil {
 		log.Println("Failed to encode event list:", err)
 		return err
 	}
 
 	// Publish the entire list as one message
-	pubAckFuture, err := jsc.PublishAsync("EVENTS.stream", data)
+	pubAckFuture, err := jsc.PublishAsync("ALERTS.stream", data)
 	if err != nil {
-		log.Println("Failed to publish event list from the start:", err)
+		log.Println("Failed to publish Alerts event list from the start:", err)
 		return err
 	}
 
 	// Wait for acknowledgment
 	select {
 	case <-pubAckFuture.Ok():
-		fmt.Println("✅ Event list published successfully!")
+		fmt.Println("✅ ALERTS Event list published successfully!")
 		return nil
 	case err := <-pubAckFuture.Err():
-		log.Println("❌ Failed to publish event list:", err)
+		log.Println("❌ Failed to publish ALERTS event list:", err)
 		return err
 	}
 }

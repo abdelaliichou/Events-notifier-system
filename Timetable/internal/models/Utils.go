@@ -1,6 +1,8 @@
 package models
 
-import "strings"
+import (
+	"github.com/gofrs/uuid"
+)
 
 // Constant static values
 const (
@@ -35,21 +37,41 @@ const (
 						);`
 	GET_ALL_EVENTS             = "SELECT * FROM events"
 	GET_EVENT_BY_ID            = "SELECT * FROM events WHERE id = ?"
+	GET_EVENT_BY_UID           = "SELECT * FROM events WHERE uid = ?"
 	GET_ALL_RESOURCES_OF_EVENT = "SELECT resource_id FROM event_resources WHERE event_id = ?"
 	UPDATE_EVENT               = `UPDATE events 
 								  SET description = ?, name = ?, start = ?, end = ?, location = ?, last_update = ?
-								  WHERE id = ?`
+								  WHERE uid = ?`
 	POST_EVENT = `INSERT INTO events (id, uid, description, name, start, end, location, last_update) 
 				  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 	DELETE_EVENT = "DELETE FROM events WHERE id = ?"
 )
 
-// Function to generate calendar URL with multiple resource IDs
+func IsEventModified(existing *Event, newEvent *Event) bool {
+	return existing.Description != newEvent.Description ||
+		existing.Name != newEvent.Name ||
+		!existing.Start.Equal(newEvent.Start) ||
+		!existing.End.Equal(newEvent.End) ||
+		existing.Location != newEvent.Location ||
+		!existing.LastUpdate.Equal(newEvent.LastUpdate)
+	// !IsResourcesEqual(existing.ResourceIDs, newEvent.ResourceIDs)
+}
 
-func CalendarURL(nbWeeks string, RESOURCE_ID ...string) string {
-	// Join multiple resource IDs with ","
-	joinedResources := strings.Join(RESOURCE_ID, ",")
+func IsResourcesEqual(existing []*uuid.UUID, new []*uuid.UUID) bool {
+	if len(existing) != len(new) {
+		return false
+	}
 
-	return "https://edt.uca.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=" + joinedResources +
-		"&projectId=2&calType=ical&" + nbWeeks + "=8&displayConfigId=128"
+	// Maps for quick comparison, charge ids in the map and check if all other ids exits in this map
+	existingMap := make(map[uuid.UUID]bool)
+	for _, id := range existing {
+		existingMap[*id] = true
+	}
+	for _, id := range new {
+		if !existingMap[*id] {
+			return false
+		}
+	}
+
+	return true
 }

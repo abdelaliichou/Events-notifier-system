@@ -50,13 +50,13 @@ func GetEvents() ([]*models.Event, error) {
 			return nil, err
 		}
 
-		var resourceIDs []uuid.UUID
+		var resourceIDs []*uuid.UUID
 		for resourceRows.Next() {
 			var resourceID uuid.UUID
 			if err := resourceRows.Scan(&resourceID); err != nil {
 				return nil, err
 			}
-			resourceIDs = append(resourceIDs, resourceID)
+			resourceIDs = append(resourceIDs, &resourceID)
 		}
 		resourceRows.Close()
 
@@ -117,17 +117,54 @@ func GetEventById(eventID uuid.UUID) (*models.Event, error) {
 	}
 	defer resourceRows.Close()
 
-	var resourceIDs []uuid.UUID
+	var resourceIDs []*uuid.UUID
 	for resourceRows.Next() {
 		var resourceID uuid.UUID
 		if err := resourceRows.Scan(&resourceID); err != nil {
 			return nil, err
 		}
-		resourceIDs = append(resourceIDs, resourceID)
+		resourceIDs = append(resourceIDs, &resourceID)
 	}
 
 	event.ResourceIDs = resourceIDs
 	return &event, nil
+}
+
+// GetEventByUID helps us to see if Event has been modified
+func GetEventByUID(event models.Event) (*models.Event, error) {
+	db, err := helpers.OpenDB()
+	if err != nil {
+		return nil, err
+	}
+	defer helpers.CloseDB(db)
+
+	// Check if event exists by UID
+	query := models.GET_EVENT_BY_UID
+	row := db.QueryRow(query, event.UID)
+
+	var newEvent models.Event
+	err = row.Scan(
+		&newEvent.Id,
+		&newEvent.UID,
+		&newEvent.Description,
+		&newEvent.Name,
+		&newEvent.Start,
+		&newEvent.End,
+		&newEvent.Location,
+		&newEvent.LastUpdate,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &models.CustomError{
+				Message: "Event not found",
+				Code:    http.StatusNotFound,
+			}
+		}
+		return nil, err
+	}
+
+	return &newEvent, nil
 }
 
 // UpdateEvent updates an existing alert in the database
@@ -140,7 +177,7 @@ func UpdateEvent(event models.Event) error {
 
 	result, err := db.Exec(models.UPDATE_EVENT,
 		event.Description, event.Name, event.Start,
-		event.End, event.Location, event.LastUpdate, event.Id.String(),
+		event.End, event.Location, event.LastUpdate, event.UID,
 	)
 
 	// Check if any row was affected (if no rows were deleted, the event wasn't found)
@@ -172,7 +209,11 @@ func CreatEvent(event models.Event) error {
 		event.LastUpdate,
 	)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteEventById deletes an event from the database by its ID

@@ -8,10 +8,14 @@ import (
 	resourcesHandler "middleware/example/internal/controllers/resources"
 	"middleware/example/internal/helpers"
 	"middleware/example/internal/models"
+	"middleware/example/internal/mq"
 	"net/http"
 )
 
 func main() {
+
+	// starting Alerts consumer
+	go mq.StartStreamConsumer()
 
 	routes()
 
