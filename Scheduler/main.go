@@ -65,13 +65,15 @@ func FetchingFromConfig(_ context.Context) {
 	}
 
 	// fetching the data from the uca server
-	FetchingFromUCA(resources)
+	FetchingFromUCA(resources, false)
 
 }
 
-func FetchingFromUCA(resources []models.Resource) {
+func FetchingFromUCA(resources []models.Resource, show bool) {
 
-	fmt.Println("\nURL with all resourceIDs : ", models.UCA_URL("8", resources))
+	if show {
+		fmt.Println("\nURL with all resourceIDs : ", models.UCA_URL("8", resources))
+	}
 
 	var allEvents []models.Event
 	for _, resource := range resources {
@@ -79,11 +81,13 @@ func FetchingFromUCA(resources []models.Resource) {
 		var customResources []models.Resource
 		customResources = append(customResources, resource)
 		url := models.UCA_URL("8", customResources)
-		fmt.Printf("\nURL of resource %d id : %s\n", resource.UcaID, url)
+		if show {
+			fmt.Printf("\nURL of resource %d id : %s\n", resource.UcaID, url)
+		}
 
 		// doing the request with this particular resourceID
-		ucaResp := HttpRequest(url, true)
-		specificResourceEvents := ParsingEvents(ucaResp, resource.Id)
+		ucaResp := HttpRequest(url, false)
+		specificResourceEvents := ParsingEvents(ucaResp, resource.Id, false)
 		allEvents = append(allEvents, specificResourceEvents...)
 
 	}
@@ -133,7 +137,7 @@ func HttpRequest(url string, show bool) []byte {
 	return body
 }
 
-func ParsingEvents(data []byte, ResourceID *uuid.UUID) []models.Event {
+func ParsingEvents(data []byte, ResourceID *uuid.UUID, show bool) []models.Event {
 	// create line reader from data
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 
@@ -147,7 +151,9 @@ func ParsingEvents(data []byte, ResourceID *uuid.UUID) []models.Event {
 	inEvent := false
 
 	// inspecting each line
-	fmt.Printf("----------------  STARTING PREPARING DATA TO BE PARSED USING SCANNER :")
+	if show {
+		fmt.Printf("----------------  STARTING PREPARING DATA TO BE PARSED USING SCANNER :")
+	}
 	fmt.Printf("\n")
 	for scanner.Scan() {
 
@@ -173,7 +179,9 @@ func ParsingEvents(data []byte, ResourceID *uuid.UUID) []models.Event {
 			currentEvent[currentKey] += scanner.Text()
 		} else {
 			// split scan
-			fmt.Printf("%s\n", scanner.Text())
+			if show {
+				fmt.Printf("%s\n", scanner.Text())
+			}
 			splitted := strings.SplitN(scanner.Text(), ":", 2)
 			currentKey = splitted[0]
 			currentValue = splitted[1]
@@ -203,8 +211,10 @@ func ParsingEvents(data []byte, ResourceID *uuid.UUID) []models.Event {
 	}
 
 	// Print the structured events
-	fmt.Printf("\n----------------  THE PARSED EVENTS FROM THE CALENDAR RESPONSE : \n")
-	models.DisplayEvents(structuredEvents)
+	if show {
+		fmt.Printf("\n----------------  THE PARSED EVENTS FROM THE CALENDAR RESPONSE : \n")
+		models.DisplayEvents(structuredEvents)
+	}
 
 	return structuredEvents
 }

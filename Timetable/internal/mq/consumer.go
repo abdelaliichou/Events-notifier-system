@@ -42,6 +42,10 @@ func StartStreamConsumer() {
 			return
 		}
 
+		if len(events) <= 0 {
+			return
+		}
+
 		// Process each event
 		var CreatedOrModifiedEvents []string
 		for i, event := range events {

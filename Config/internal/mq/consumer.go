@@ -127,24 +127,20 @@ func HttpRequest(url string, show bool) []byte {
 }
 
 func preparingAlerts(events []models.Event) {
-
+	if len(events) <= 0 {
+		fmt.Println("Everything is updated!")
+		return
+	}
 	alerts, err := repository.GetAllAlerts()
 	if err != nil {
 		return
 	}
 
 	models.DisplayAlerts(alerts)
-
 	handlingAlerts(alerts, events)
-
 }
 
 func handlingAlerts(alerts []*models.Alert, events []models.Event) {
-	if len(events) <= 0 {
-		fmt.Println("Everything is updated!")
-		return
-	}
-
 	for _, alert := range alerts {
 		if alert.IsAll {
 			sendMail(alert.Email, events, true)
@@ -157,9 +153,7 @@ func handlingAlerts(alerts []*models.Alert, events []models.Event) {
 			fmt.Printf("User with email %s has no Alert for his events\n", alert.Email)
 			continue
 		}
-
 		sendMail(alert.Email, subscribeEvents, false)
-
 	}
 }
 
@@ -177,7 +171,6 @@ func checkAlertResourceInEventResources(alertResourceID *uuid.UUID, events []mod
 }
 
 func sendMail(mail string, events []models.Event, all bool) {
-
 	var eventsNames []string
 	for _, event := range events {
 		eventsNames = append(eventsNames, event.Name)
