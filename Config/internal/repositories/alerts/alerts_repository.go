@@ -59,6 +59,36 @@ func GetAlertById(id uuid.UUID) (*models.Alert, error) {
 	return &alert, nil
 }
 
+// GetAlertsByResourceOrByAll returns the alerts where all = true or resourceID = Event resource
+//func GetAlertsByResourceOrByAll(resourceID *uuid.UUID) ([]*models.Alert, error) {
+//	db, err := helpers.OpenDB()
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer helpers.CloseDB(db)
+//
+//	rows, err := db.Query(models.GET_ALERT_FOR_EVENT, resourceID)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer rows.Close()
+//
+//	var alerts []*models.Alert
+//
+//	// Iterate through results and scan into struct
+//	for rows.Next() {
+//		var alert models.Alert
+//		err := rows.Scan(&alert.Id, &alert.Email, &alert.IsAll, &alert.ResourceID)
+//		if err != nil {
+//			return nil, err
+//		}
+//		alerts = append(alerts, &alert)
+//	}
+//
+//	return alerts, nil
+//}
+
 // UpdateAlert updates an existing alert in the database
 func UpdateAlert(alert models.Alert) error {
 	db, err := helpers.OpenDB()

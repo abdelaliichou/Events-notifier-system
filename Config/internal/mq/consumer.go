@@ -3,11 +3,14 @@ package mq
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/nats-io/nats.go"
 	"io"
 	"log"
 	"middleware/example/internal/models"
+	repository "middleware/example/internal/repositories/alerts"
 	"net/http"
+	"strings"
 )
 
 var jsc nats.JetStreamContext
@@ -59,6 +62,7 @@ func StartStreamConsumer() {
 		var event models.Event
 		// Process each event
 		for _, eventID := range eventIDs {
+
 			fmt.Println("Received Event from Timetable:", eventID)
 			response := HttpRequest("http://localhost:8090/events/"+eventID, false)
 
@@ -71,6 +75,9 @@ func StartStreamConsumer() {
 		}
 
 		models.DisplayEvents(events)
+
+		// Handling sending alerts to users subscribed in a resourceID
+		preparingAlerts(events)
 
 		// Acknowledge the message after processing
 		m.Ack()
@@ -117,4 +124,72 @@ func HttpRequest(url string, show bool) []byte {
 	}
 
 	return body
+}
+
+func preparingAlerts(events []models.Event) {
+
+	alerts, err := repository.GetAllAlerts()
+	if err != nil {
+		return
+	}
+
+	models.DisplayAlerts(alerts)
+
+	handlingAlerts(alerts, events)
+
+}
+
+func handlingAlerts(alerts []*models.Alert, events []models.Event) {
+	if len(events) <= 0 {
+		fmt.Println("Everything is updated!")
+		return
+	}
+
+	for _, alert := range alerts {
+		if alert.IsAll {
+			sendMail(alert.Email, events, true)
+			continue
+		}
+
+		// checking if the resourceID of this alert exists in the resourceIDs of the events received
+		subscribeEvents := checkAlertResourceInEventResources(alert.ResourceID, events)
+		if len(subscribeEvents) <= 0 {
+			fmt.Printf("User with email %s has no Alert for his events\n", alert.Email)
+			continue
+		}
+
+		sendMail(alert.Email, subscribeEvents, false)
+
+	}
+}
+
+func checkAlertResourceInEventResources(alertResourceID *uuid.UUID, events []models.Event) []models.Event {
+	var subscribeEvents []models.Event
+	for _, event := range events {
+		for _, res := range event.ResourceIDs {
+			if res != nil && res.String() == alertResourceID.String() {
+				subscribeEvents = append(subscribeEvents, event)
+				break
+			}
+		}
+	}
+	return subscribeEvents
+}
+
+func sendMail(mail string, events []models.Event, all bool) {
+
+	var eventsNames []string
+	for _, event := range events {
+		eventsNames = append(eventsNames, event.Name)
+	}
+	mailBody := strings.Join(eventsNames, ", ")
+
+	if all {
+		// send mail about all the events
+		fmt.Printf("Sending mail to %s, you're subscribed to all events, check your timetable there's some modifications concerning : %s \n", mail, mailBody)
+		return
+	}
+
+	// send mail only about some subscribe events
+	fmt.Printf("Sending mail to %s, check your timetable there's some modifications concerning : %s \n", mail, mailBody)
 }

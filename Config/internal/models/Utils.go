@@ -36,14 +36,15 @@ const (
 					WHERE id = ?`
 	CREAT_ALERT = `INSERT INTO alerts (id, email, is_all, resourceID) 
 					VALUES (?, ?, ?, ?)`
-	DELETE_ALERT      = "DELETE FROM alerts WHERE id = ?"
-	GET_ALL_ALERTS    = "SELECT * FROM alerts"
-	GET_ALERT         = "SELECT * FROM alerts WHERE id = ?"
-	GET_ALL_RESOURCES = "SELECT * FROM resources"
-	GET_RESOURCE      = "SELECT * FROM resources WHERE id=?"
-	CREAT_RESOURCE    = "INSERT INTO resources (id, ucaID, name) VALUES (?, ?, ?)"
-	UPDATE_RESOURCE   = "UPDATE resources SET ucaID=?, name=? WHERE id=?"
-	DELETE_RESOURCE   = "DELETE FROM resources WHERE id=?"
+	GET_ALERT_FOR_EVENT = "SELECT * FROM alerts WHERE resourceID = ? OR is_all = TRUE"
+	DELETE_ALERT        = "DELETE FROM alerts WHERE id = ?"
+	GET_ALL_ALERTS      = "SELECT * FROM alerts"
+	GET_ALERT           = "SELECT * FROM alerts WHERE id = ?"
+	GET_ALL_RESOURCES   = "SELECT * FROM resources"
+	GET_RESOURCE        = "SELECT * FROM resources WHERE id=?"
+	CREAT_RESOURCE      = "INSERT INTO resources (id, ucaID, name) VALUES (?, ?, ?)"
+	UPDATE_RESOURCE     = "UPDATE resources SET ucaID=?, name=? WHERE id=?"
+	DELETE_RESOURCE     = "DELETE FROM resources WHERE id=?"
 )
 
 // Function to generate calendar URL with multiple resource IDs
@@ -67,6 +68,17 @@ func DisplayEvents(events []Event) {
 		fmt.Printf("  Start: %s\n", event.Start.Format(time.RFC3339))
 		fmt.Printf("  End: %s\n", event.End.Format(time.RFC3339))
 		fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))
+		fmt.Println("-----")
+	}
+}
+
+func DisplayAlerts(alerts []*Alert) {
+	for i, alert := range alerts {
+		fmt.Printf("Alert %d:\n", i+1)
+		fmt.Printf("  Id: %s\n", alert.Id)
+		fmt.Printf("  isAll: %t\n", alert.IsAll)
+		fmt.Printf("  Email ID: %s\n", alert.Email)
+		fmt.Printf("  ResourceID: %s\n", alert.ResourceID)
 		fmt.Println("-----")
 	}
 }
