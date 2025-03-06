@@ -2,7 +2,6 @@ package collections
 
 import (
 	"encoding/json"
-	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"middleware/example/internal/models"
 	"middleware/example/internal/services/events"
@@ -12,10 +11,11 @@ import (
 // GetEvent retrieves an event from the database using the Event ID from the context
 func GetEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	eventID, _ := ctx.Value("eventID").(uuid.UUID)
+	//eventUID, _ := ctx.Value("eventID").(uuid.UUID)
+	eventUID := ctx.Value("eventID")
 
 	// Fetch the event from the service layer
-	event, err := events.GetEventByID(eventID)
+	event, err := events.GetEventByID(eventUID.(string))
 	if err != nil {
 		logrus.Errorf("Error: %s", err.Error())
 		customError, isCustom := err.(*models.CustomError)

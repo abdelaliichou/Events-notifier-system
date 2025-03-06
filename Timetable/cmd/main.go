@@ -33,14 +33,14 @@ func routes() {
 
 	// ---------------------- EVENTS ROUTES ----------------------
 	r.Route("/events", func(r chi.Router) {
-		r.Post("/", eventsHandler.CreatEvent) // Create an event
-		r.Get("/", eventsHandler.GetEvents)   // Get all event
+		//r.Post("/", eventsHandler.CreatEvent) // Create an event
+		r.Get("/", eventsHandler.GetEvents) // Get all event
 
 		r.Route("/{id}", func(r chi.Router) {
-			r.Use(eventsHandler.CtxAlert)            // Middleware to extract event ID
-			r.Get("/", eventsHandler.GetEvent)       // Get event by ID
-			r.Put("/", eventsHandler.UpdateEvent)    // Update event by ID
-			r.Delete("/", eventsHandler.DeleteEvent) // Delete event by ID
+			r.Use(eventsHandler.CtxAlert)      // Middleware to extract event ID
+			r.Get("/", eventsHandler.GetEvent) // Get event by UID
+			//r.Put("/", eventsHandler.UpdateEvent) // Update event by ID
+			//r.Delete("/", eventsHandler.DeleteEvent) // Delete event by ID
 		})
 	})
 

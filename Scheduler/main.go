@@ -73,10 +73,8 @@ func FetchingFromUCA(resources []models.Resource) {
 
 	fmt.Println("\nURL with all resourceIDs : ", models.UCA_URL("8", resources))
 
+	var allEvents []models.Event
 	for _, resource := range resources {
-
-		// filter resources based on the Name field
-		// filter()
 
 		var customResources []models.Resource
 		customResources = append(customResources, resource)
@@ -85,16 +83,22 @@ func FetchingFromUCA(resources []models.Resource) {
 
 		// doing the request with this particular resourceID
 		ucaResp := HttpRequest(url, true)
-		ParsingEvents(ucaResp, resource.Id)
+		specificResourceEvents := ParsingEvents(ucaResp, resource.Id)
+		allEvents = append(allEvents, specificResourceEvents...)
 
 	}
-}
 
-func filter() {
-	// Filtering recourses
-	/*if resource.Name == "M1 Groupe option" {
-	//	// || resource.Name == "M1 Groupe 2 langue" {
-	}*/
+	fmt.Println("ALL EVENTS FROM ALL RESOURCES :")
+	models.DisplayEvents(allEvents)
+
+	// Group events by UID & merge resource IDs
+	groupedEvents := groupEventsByUID(allEvents)
+
+	fmt.Println("ALL EVENTS FROM ALL RESOURCES AFTER GROUPING :")
+	models.DisplayEvents(groupedEvents)
+
+	// Send into MQ
+	sendEventsToMQ(groupedEvents)
 }
 
 func HttpRequest(url string, show bool) []byte {
@@ -129,7 +133,7 @@ func HttpRequest(url string, show bool) []byte {
 	return body
 }
 
-func ParsingEvents(data []byte, ResourceID *uuid.UUID) {
+func ParsingEvents(data []byte, ResourceID *uuid.UUID) []models.Event {
 	// create line reader from data
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 
@@ -200,21 +204,58 @@ func ParsingEvents(data []byte, ResourceID *uuid.UUID) {
 
 	// Print the structured events
 	fmt.Printf("\n----------------  THE PARSED EVENTS FROM THE CALENDAR RESPONSE : \n")
-	for i, event := range structuredEvents {
-		fmt.Printf("Event %d:\n", i+1)
-		fmt.Printf("  Description: %s\n", event.Description)
-		fmt.Printf("  Location: %s\n", event.Location)
-		fmt.Printf("  RESOURCES ID: %s\n", event.ResourceIDs)
-		fmt.Printf("  UID: %s\n", event.UID)
-		fmt.Printf("  NAME: %s\n", event.Name)
-		fmt.Printf("  Start: %s\n", event.Start.Format(time.RFC3339))
-		fmt.Printf("  End: %s\n", event.End.Format(time.RFC3339))
-		fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))
-		fmt.Println("-----")
+	models.DisplayEvents(structuredEvents)
+
+	return structuredEvents
+}
+
+// groupEventsByUID combine different resourceIDs events in single event the resourcesID[] contains all the resources of those events
+func groupEventsByUID(events []models.Event) []models.Event {
+	groupedEvents := make(map[string]models.Event)
+
+	for _, event := range events {
+		if len(event.ResourceIDs) == 0 {
+			continue // Skip events without a resource ID
+		}
+
+		// Check if the event UID already exists
+		if existingEvent, found := groupedEvents[event.UID]; found {
+			// Add his resourceID to the existing resources
+			existingEvent.ResourceIDs = mergeUnique(existingEvent.ResourceIDs, event.ResourceIDs)
+			groupedEvents[event.UID] = existingEvent
+		} else {
+			// Add new event to the map
+			groupedEvents[event.UID] = event
+		}
 	}
 
-	// Send into MQ
-	sendEventsToMQ(structuredEvents)
+	// Convert the map to a slice of events
+	var mergedEvents []models.Event
+	for _, event := range groupedEvents {
+		mergedEvents = append(mergedEvents, event)
+	}
+
+	return mergedEvents
+}
+
+// mergeUnique merge unique resource IDs
+func mergeUnique(existing []*uuid.UUID, newIDs []*uuid.UUID) []*uuid.UUID {
+	resourceSet := make(map[uuid.UUID]struct{})
+
+	// Add existing resource IDs to the set
+	for _, id := range existing {
+		resourceSet[*id] = struct{}{}
+	}
+
+	// Add new resource ID if not already present
+	for _, id := range newIDs {
+		if _, exists := resourceSet[*id]; !exists {
+			existing = append(existing, id)
+			resourceSet[*id] = struct{}{}
+		}
+	}
+
+	return existing
 }
 
 // sendEventsToMQ will send structured events to our producer as a stream to MQ

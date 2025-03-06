@@ -45,7 +45,7 @@ func GetEvents() ([]*models.Event, error) {
 		}
 
 		// Fetch resource IDs related to this event
-		resourceRows, err := db.Query(models.GET_ALL_RESOURCES_OF_EVENT, event.Id)
+		resourceRows, err := db.Query(models.GET_ALL_RESOURCES_OF_EVENT, event.UID)
 		if err != nil {
 			return nil, err
 		}
@@ -76,62 +76,8 @@ func GetEvents() ([]*models.Event, error) {
 	return events, nil
 }
 
-// GetEventById fetches an event by its ID from the database
-func GetEventById(eventID uuid.UUID) (*models.Event, error) {
-	db, err := helpers.OpenDB()
-	if err != nil {
-		return nil, err
-	}
-	defer helpers.CloseDB(db)
-
-	// Query to fetch the event details
-	query := models.GET_EVENT_BY_ID
-	row := db.QueryRow(query, eventID)
-
-	var event models.Event
-	err = row.Scan(
-		&event.Id,
-		&event.UID,
-		&event.Description,
-		&event.Name,
-		&event.Start,
-		&event.End,
-		&event.Location,
-		&event.LastUpdate,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, &models.CustomError{
-				Message: "Event not found",
-				Code:    http.StatusNotFound,
-			}
-		}
-		return nil, err
-	}
-
-	// Fetch resource IDs related to this event
-	resourceQuery := models.GET_ALL_RESOURCES_OF_EVENT
-	resourceRows, err := db.Query(resourceQuery, event.Id)
-	if err != nil {
-		return nil, err
-	}
-	defer resourceRows.Close()
-
-	var resourceIDs []*uuid.UUID
-	for resourceRows.Next() {
-		var resourceID uuid.UUID
-		if err := resourceRows.Scan(&resourceID); err != nil {
-			return nil, err
-		}
-		resourceIDs = append(resourceIDs, &resourceID)
-	}
-
-	event.ResourceIDs = resourceIDs
-	return &event, nil
-}
-
 // GetEventByUID helps us to see if Event has been modified
-func GetEventByUID(event models.Event) (*models.Event, error) {
+func GetEventByUID(eventUID string) (*models.Event, error) {
 	db, err := helpers.OpenDB()
 	if err != nil {
 		return nil, err
@@ -140,7 +86,7 @@ func GetEventByUID(event models.Event) (*models.Event, error) {
 
 	// Check if event exists by UID
 	query := models.GET_EVENT_BY_UID
-	row := db.QueryRow(query, event.UID)
+	row := db.QueryRow(query, eventUID)
 
 	var newEvent models.Event
 	err = row.Scan(
@@ -164,6 +110,25 @@ func GetEventByUID(event models.Event) (*models.Event, error) {
 		return nil, err
 	}
 
+	// Query resource IDs associated with the event
+	resourceQuery := models.GET_ALL_RESOURCES_OF_EVENT
+	rows, err := db.Query(resourceQuery, eventUID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Collect resource IDs
+	var resourceIDs []*uuid.UUID
+	for rows.Next() {
+		var resourceID uuid.UUID
+		if err := rows.Scan(&resourceID); err != nil {
+			return nil, err
+		}
+		resourceIDs = append(resourceIDs, &resourceID)
+	}
+
+	newEvent.ResourceIDs = resourceIDs
 	return &newEvent, nil
 }
 
@@ -195,6 +160,24 @@ func UpdateEvent(event models.Event) error {
 	return nil
 }
 
+// UpdateEventResources updates resource IDs linked to an event
+func UpdateEventResources(eventUID string, newResourceIDs []*uuid.UUID) error {
+	db, err := helpers.OpenDB()
+	if err != nil {
+		return err
+	}
+	defer helpers.CloseDB(db)
+
+	// Remove old resource IDs
+	_, err = db.Exec(models.DELETE_RESOURCE_IDS, eventUID)
+	if err != nil {
+		return err
+	}
+
+	// Insert new resource IDs
+	return InsertEventResources(eventUID, newResourceIDs)
+}
+
 // CreatEvent inserts a new event into the database
 func CreatEvent(event models.Event) error {
 	db, err := helpers.OpenDB()
@@ -211,6 +194,31 @@ func CreatEvent(event models.Event) error {
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// InsertEventResources inserts resource IDs for a given event UID
+func InsertEventResources(eventUID string, resourceIDs []*uuid.UUID) error {
+	db, err := helpers.OpenDB()
+	if err != nil {
+		return err
+	}
+	defer helpers.CloseDB(db)
+
+	// First, delete existing resource associations for this event
+	_, err = db.Exec(models.DELETE_RESOURCE_IDS, eventUID)
+	if err != nil {
+		return err
+	}
+
+	query := models.INSERT_RESOURCE_IDS
+	for _, resourceID := range resourceIDs {
+		_, err := db.Exec(query, eventUID, resourceID.String())
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

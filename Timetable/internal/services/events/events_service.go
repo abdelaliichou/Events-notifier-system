@@ -28,8 +28,8 @@ func GetAllEvents() ([]*models.Event, error) {
 }
 
 // GetEventByID retrieves an event by ID
-func GetEventByID(id uuid.UUID) (*models.Event, error) {
-	event, err := repository.GetEventById(id)
+func GetEventByID(id string) (*models.Event, error) {
+	event, err := repository.GetEventByUID(id)
 	if err != nil {
 		if err.Error() == sql.ErrNoRows.Error() {
 			return nil, &models.CustomError{
@@ -57,6 +57,14 @@ func UpdateEvent(event models.Event) error {
 			Code:    http.StatusInternalServerError,
 		}
 	}
+
+	// Update resource IDs
+	err = repository.UpdateEventResources(event.UID, event.ResourceIDs)
+	if err != nil {
+		logrus.Errorf("Error updating resource IDs: %s", err.Error())
+		return err
+	}
+
 	return nil
 }
 

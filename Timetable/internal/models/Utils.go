@@ -1,7 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"github.com/gofrs/uuid"
+	"time"
 )
 
 // Constant static values
@@ -18,27 +20,30 @@ const (
 	M1_TUTORAT_L2      = "56529"
 	DB_NAME            = "file:timetable.db"
 	CREAT_EVENT        = `CREATE TABLE IF NOT EXISTS events (
-							id TEXT PRIMARY KEY NOT NULL UNIQUE,
-							uid TEXT NOT NULL,
-							description TEXT NOT NULL,
-							name TEXT NOT NULL,
-							start DATETIME NOT NULL,
-							end DATETIME NOT NULL,
-							location TEXT NOT NULL,
-							last_update DATETIME NOT NULL
-						);`
+						  id TEXT PRIMARY KEY NOT NULL UNIQUE,
+						  uid TEXT NOT NULL UNIQUE, -- UID is unique
+						  description TEXT NOT NULL,
+						  name TEXT NOT NULL,
+						  start DATETIME NOT NULL,
+						  end DATETIME NOT NULL,
+						  location TEXT NOT NULL,
+						  last_update DATETIME NOT NULL
+						 );`
 	// this one if to represent list of resources blongs to the same event
 	CREAT_RESOURCE = `CREATE TABLE IF NOT EXISTS event_resources (
-							event_id TEXT NOT NULL,
-							resource_id TEXT NOT NULL,
-							PRIMARY KEY (event_id, resource_id),
-							FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-							FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
-						);`
+					      event_uid TEXT NOT NULL,
+					      resource_id TEXT NOT NULL,
+					      PRIMARY KEY (event_uid, resource_id),
+					      FOREIGN KEY (event_uid) REFERENCES events(uid) ON DELETE CASCADE,
+					      FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
+				         );`
+	INSERT_RESOURCE_IDS = `INSERT INTO event_resources (event_uid, resource_id) VALUES (?, ?)
+             					  ON CONFLICT(event_uid, resource_id) DO NOTHING`
+	DELETE_RESOURCE_IDS        = `DELETE FROM event_resources WHERE event_uid = ?`
 	GET_ALL_EVENTS             = "SELECT * FROM events"
 	GET_EVENT_BY_ID            = "SELECT * FROM events WHERE id = ?"
 	GET_EVENT_BY_UID           = "SELECT * FROM events WHERE uid = ?"
-	GET_ALL_RESOURCES_OF_EVENT = "SELECT resource_id FROM event_resources WHERE event_id = ?"
+	GET_ALL_RESOURCES_OF_EVENT = "SELECT resource_id FROM event_resources WHERE event_uid = ?"
 	UPDATE_EVENT               = `UPDATE events 
 								  SET description = ?, name = ?, start = ?, end = ?, location = ?, last_update = ?
 								  WHERE uid = ?`
@@ -48,30 +53,49 @@ const (
 )
 
 func IsEventModified(existing *Event, newEvent *Event) bool {
-	return existing.Description != newEvent.Description ||
+	return IsResourcesModified(existing.ResourceIDs, newEvent.ResourceIDs) ||
+		existing.Description != newEvent.Description ||
 		existing.Name != newEvent.Name ||
 		!existing.Start.Equal(newEvent.Start) ||
 		!existing.End.Equal(newEvent.End) ||
 		existing.Location != newEvent.Location ||
 		!existing.LastUpdate.Equal(newEvent.LastUpdate)
-	// !IsResourcesEqual(existing.ResourceIDs, newEvent.ResourceIDs)
 }
 
-func IsResourcesEqual(existing []*uuid.UUID, new []*uuid.UUID) bool {
-	if len(existing) != len(new) {
-		return false
+// IsResourcesModified checks if two slices of UUIDs are equal (order does not matter)
+func IsResourcesModified(existingResources []*uuid.UUID, newResources []*uuid.UUID) bool {
+	if len(existingResources) != len(newResources) {
+		return true
 	}
 
-	// Maps for quick comparison, charge ids in the map and check if all other ids exits in this map
-	existingMap := make(map[uuid.UUID]bool)
-	for _, id := range existing {
-		existingMap[*id] = true
-	}
-	for _, id := range new {
-		if !existingMap[*id] {
-			return false
+	// Convert both lists to UUID value sets for comparison
+	existingSet := make(map[uuid.UUID]bool)
+	for _, id := range existingResources {
+		if id != nil {
+			existingSet[*id] = true
 		}
 	}
 
-	return true
+	for _, id := range newResources {
+		if id == nil || !existingSet[*id] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func DisplayEvents(event Event, i int, all bool) {
+	if all {
+		fmt.Printf("Event %d:\n", i+1)
+	}
+	fmt.Printf("  Description: %s\n", event.Description)
+	fmt.Printf("  Location: %s\n", event.Location)
+	fmt.Printf("  RESOURCES ID: %s\n", event.ResourceIDs)
+	fmt.Printf("  UID: %s\n", event.UID)
+	fmt.Printf("  NAME: %s\n", event.Name)
+	fmt.Printf("  Start: %s\n", event.Start.Format(time.RFC3339))
+	fmt.Printf("  End: %s\n", event.End.Format(time.RFC3339))
+	fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))
+	fmt.Println("-----")
 }

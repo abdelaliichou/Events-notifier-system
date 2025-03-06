@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/nats-io/nats.go"
+	"io"
 	"log"
+	"middleware/example/internal/models"
+	"net/http"
 )
 
 var jsc nats.JetStreamContext
@@ -52,10 +55,22 @@ func StartStreamConsumer() {
 			return
 		}
 
+		var events []models.Event
+		var event models.Event
 		// Process each event
 		for _, eventID := range eventIDs {
 			fmt.Println("Received Event from Timetable:", eventID)
+			response := HttpRequest("http://localhost:8090/events/"+eventID, false)
+
+			err := json.Unmarshal(response, &event)
+			if err != nil {
+				return
+			}
+
+			events = append(events, event)
 		}
+
+		models.DisplayEvents(events)
 
 		// Acknowledge the message after processing
 		m.Ack()
@@ -70,4 +85,36 @@ func StartStreamConsumer() {
 
 	// Prevent program from exiting
 	select {}
+}
+
+func HttpRequest(url string, show bool) []byte {
+
+	// Make the HTTP GET request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error making the request:", err)
+		return []byte("No body exists because of error!")
+	}
+	defer resp.Body.Close()
+
+	// Check if the response status code is OK (200)
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Error: Received status code", resp.StatusCode)
+		return []byte("No body exists because of error!")
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading the response body:", err)
+		return []byte("No body exists because of error!")
+	}
+
+	// Print the raw iCalendar data
+	if show {
+		fmt.Println("TimeTable Http response from : ", url)
+		fmt.Println(string(body))
+	}
+
+	return body
 }
