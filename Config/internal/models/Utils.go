@@ -45,6 +45,7 @@ const (
 	CREAT_RESOURCE      = "INSERT INTO resources (id, ucaID, name) VALUES (?, ?, ?)"
 	UPDATE_RESOURCE     = "UPDATE resources SET ucaID=?, name=? WHERE id=?"
 	DELETE_RESOURCE     = "DELETE FROM resources WHERE id=?"
+	MailAPI             = "https://mail.edu.forestier.re/api/send"
 )
 
 // Function to generate calendar URL with multiple resource IDs

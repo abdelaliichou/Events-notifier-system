@@ -11,6 +11,7 @@ import (
 	repository "middleware/example/internal/repositories/alerts"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var jsc nats.JetStreamContext
@@ -55,6 +56,10 @@ func StartStreamConsumer() {
 		var eventIDs []string
 		if err := json.Unmarshal(m.Data, &eventIDs); err != nil {
 			log.Println("❌ Failed to decode event list:", err)
+			return
+		}
+
+		if len(eventIDs) <= 0 {
 			return
 		}
 
@@ -128,9 +133,10 @@ func HttpRequest(url string, show bool) []byte {
 
 func preparingAlerts(events []models.Event) {
 	if len(events) <= 0 {
-		fmt.Println("Everything is updated!")
+		//	fmt.Println("Everything is updated!")
 		return
 	}
+
 	alerts, err := repository.GetAllAlerts()
 	if err != nil {
 		return
@@ -143,7 +149,7 @@ func preparingAlerts(events []models.Event) {
 func handlingAlerts(alerts []*models.Alert, events []models.Event) {
 	for _, alert := range alerts {
 		if alert.IsAll {
-			sendMail(alert.Email, events, true)
+			preparingMail(alert.Email, events, true)
 			continue
 		}
 
@@ -153,7 +159,7 @@ func handlingAlerts(alerts []*models.Alert, events []models.Event) {
 			fmt.Printf("User with email %s has no Alert for his events\n", alert.Email)
 			continue
 		}
-		sendMail(alert.Email, subscribeEvents, false)
+		preparingMail(alert.Email, subscribeEvents, false)
 	}
 }
 
@@ -170,7 +176,7 @@ func checkAlertResourceInEventResources(alertResourceID *uuid.UUID, events []mod
 	return subscribeEvents
 }
 
-func sendMail(mail string, events []models.Event, all bool) {
+func preparingMail(mail string, events []models.Event, all bool) {
 	var eventsNames []string
 	for _, event := range events {
 		eventsNames = append(eventsNames, event.Name)
@@ -179,10 +185,42 @@ func sendMail(mail string, events []models.Event, all bool) {
 
 	if all {
 		// send mail about all the events
-		fmt.Printf("Sending mail to %s, you're subscribed to all events, check your timetable there's some modifications concerning : %s \n", mail, mailBody)
+		fmt.Printf("Sending mail concerning : %s \n", mailBody)
+		sendMail(mail, mailBody)
 		return
 	}
 
 	// send mail only about some subscribe events
-	fmt.Printf("Sending mail to %s, check your timetable there's some modifications concerning : %s \n", mail, mailBody)
+	fmt.Printf("Sending mail concerning : %s \n", mailBody)
+	sendMail(mail, mailBody)
+}
+
+func sendMail(mail string, content string) {
+	// Token required for the API
+	token := "PueiQkxDnrLjMHlFzfVVUCojDPTlZchQeRWecXTk"
+
+	// Example event data
+	event := struct {
+		EventName string
+		Start     string
+		End       string
+		Location  string
+	}{
+		EventName: content,
+		Start:     time.Now().Format("2006-01-02 15:04"),
+		End:       time.Now().Add(2 * time.Hour).Format("2006-01-02 15:04"),
+		Location:  "ISIMA",
+	}
+
+	// Get email content from template
+	emailContent, err := models.GetEmailContent("mail.html", event)
+	if err != nil {
+		log.Fatalf("Failed to generate email content: %s", err)
+	}
+
+	// Send email
+	err = models.SendEmail("abdelali.ichou@etu.uca.fr", emailContent.Subject, emailContent.Body, token)
+	if err != nil {
+		log.Fatalf("Failed to send email: %s", err)
+	}
 }
