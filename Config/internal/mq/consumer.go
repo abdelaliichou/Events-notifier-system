@@ -212,7 +212,7 @@ func sendMail(mail string, content string) {
 		Location:  "ISIMA",
 	}
 
-	// Get email content from template
+	// Get email html shape from template
 	emailContent, err := models.GetEmailContent("mail.html", event)
 	if err != nil {
 		log.Fatalf("Failed to generate email content: %s", err)

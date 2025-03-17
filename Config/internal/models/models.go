@@ -36,8 +36,7 @@ type EmailContent struct {
 }
 
 type MailRequest struct {
-	To      string `json:"to"`
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
-	Token   string `json:"token"`
+	Recipient string `json:"recipient"`
+	Subject   string `json:"subject"`
+	Content   string `json:"content"`
 }

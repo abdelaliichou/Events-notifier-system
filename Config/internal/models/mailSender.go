@@ -10,10 +10,9 @@ import (
 // SendEmail Sends an email using the external API
 func SendEmail(to string, subject string, body string, token string) error {
 	payload := MailRequest{
-		To:      to,
-		Subject: subject,
-		Body:    body,
-		Token:   token,
+		Recipient: to,
+		Subject:   subject,
+		Content:   body,
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -27,6 +26,7 @@ func SendEmail(to string, subject string, body string, token string) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", token)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -35,7 +35,7 @@ func SendEmail(to string, subject string, body string, token string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("failed to send email, status: %d", resp.StatusCode)
 	}
 

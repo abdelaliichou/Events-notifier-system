@@ -44,6 +44,15 @@ func routes() {
 		})
 	})
 
+	// events?uid=
+	// email avec les choses qui ont ete modifier dans les cours
+	// alerter dans un autre code
+	// separer le code MVC
+	// quand notifer
+	// si le cours a ete supprimer cette semain, on le supprime
+	// si le cours ajouter dans cette semain
+	// ajouter de cours normal apres on dernier evenemt il est pas vraiment important
+
 	// Start the server
 	logrus.Info("[INFO] Web server started. Now listening on *:8090")
 	logrus.Fatalln(http.ListenAndServe(":8090", r))
