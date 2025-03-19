@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/gofrs/uuid"
 	"strings"
 	"time"
 )
@@ -82,4 +83,17 @@ func DisplayAlerts(alerts []*Alert) {
 		fmt.Printf("  ResourceID: %s\n", alert.ResourceID)
 		fmt.Println("-----")
 	}
+}
+
+func CheckAlertResourceInEventResources(alertResourceID *uuid.UUID, events []Event) []Event {
+	var subscribeEvents []Event
+	for _, event := range events {
+		for _, res := range event.ResourceIDs {
+			if res != nil && res.String() == alertResourceID.String() {
+				subscribeEvents = append(subscribeEvents, event)
+				break
+			}
+		}
+	}
+	return subscribeEvents
 }

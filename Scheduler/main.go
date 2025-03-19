@@ -3,6 +3,7 @@ package main
 import (
 	"Scheduler/models"
 	"Scheduler/mq"
+	"Scheduler/webservice"
 	"bufio"
 	"bytes"
 	"context"
@@ -10,9 +11,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/zhashkevych/scheduler"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -48,7 +47,7 @@ func FetchingFromConfig(_ context.Context) {
 
 	// Make the HTTP GET request
 	var body []byte
-	body = HttpRequest(models.CONFIG_PATH, false)
+	body = webservice.HttpRequest(models.CONFIG_PATH, false)
 
 	// Parse the JSON data into a slice of Resource structs
 	var resources []models.Resource
@@ -86,7 +85,7 @@ func FetchingFromUCA(resources []models.Resource, show bool) {
 		}
 
 		// doing the request with this particular resourceID
-		ucaResp := HttpRequest(url, false)
+		ucaResp := webservice.HttpRequest(url, false)
 		specificResourceEvents := ParsingEvents(ucaResp, resource.Id, false)
 		allEvents = append(allEvents, specificResourceEvents...)
 
@@ -96,45 +95,13 @@ func FetchingFromUCA(resources []models.Resource, show bool) {
 	models.DisplayEvents(allEvents)
 
 	// Group events by UID & merge resource IDs
-	groupedEvents := groupEventsByUID(allEvents)
+	groupedEvents := models.GroupEventsByUID(allEvents)
 
 	fmt.Println("ALL EVENTS FROM ALL RESOURCES AFTER GROUPING :")
 	models.DisplayEvents(groupedEvents)
 
 	// Send into MQ
 	sendEventsToMQ(groupedEvents)
-}
-
-func HttpRequest(url string, show bool) []byte {
-
-	// Make the HTTP GET request
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Error making the request:", err)
-		return []byte("No body exists because of error!")
-	}
-	defer resp.Body.Close()
-
-	// Check if the response status code is OK (200)
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error: Received status code", resp.StatusCode)
-		return []byte("No body exists because of error!")
-	}
-
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading the response body:", err)
-		return []byte("No body exists because of error!")
-	}
-
-	// Print the raw iCalendar data
-	if show {
-		fmt.Println("\niCalendar response from : ", url)
-		fmt.Println(string(body))
-	}
-
-	return body
 }
 
 func ParsingEvents(data []byte, ResourceID *uuid.UUID, show bool) []models.Event {
@@ -217,55 +184,6 @@ func ParsingEvents(data []byte, ResourceID *uuid.UUID, show bool) []models.Event
 	}
 
 	return structuredEvents
-}
-
-// groupEventsByUID combine different resourceIDs events in single event the resourcesID[] contains all the resources of those events
-func groupEventsByUID(events []models.Event) []models.Event {
-	groupedEvents := make(map[string]models.Event)
-
-	for _, event := range events {
-		if len(event.ResourceIDs) == 0 {
-			continue // Skip events without a resource ID
-		}
-
-		// Check if the event UID already exists
-		if existingEvent, found := groupedEvents[event.UID]; found {
-			// Add his resourceID to the existing resources
-			existingEvent.ResourceIDs = mergeUnique(existingEvent.ResourceIDs, event.ResourceIDs)
-			groupedEvents[event.UID] = existingEvent
-		} else {
-			// Add new event to the map
-			groupedEvents[event.UID] = event
-		}
-	}
-
-	// Convert the map to a slice of events
-	var mergedEvents []models.Event
-	for _, event := range groupedEvents {
-		mergedEvents = append(mergedEvents, event)
-	}
-
-	return mergedEvents
-}
-
-// mergeUnique merge unique resource IDs
-func mergeUnique(existing []*uuid.UUID, newIDs []*uuid.UUID) []*uuid.UUID {
-	resourceSet := make(map[uuid.UUID]struct{})
-
-	// Add existing resource IDs to the set
-	for _, id := range existing {
-		resourceSet[*id] = struct{}{}
-	}
-
-	// Add new resource ID if not already present
-	for _, id := range newIDs {
-		if _, exists := resourceSet[*id]; !exists {
-			existing = append(existing, id)
-			resourceSet[*id] = struct{}{}
-		}
-	}
-
-	return existing
 }
 
 // sendEventsToMQ will send structured events to our producer as a stream to MQ
