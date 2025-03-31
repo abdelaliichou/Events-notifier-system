@@ -66,7 +66,7 @@ func StartStreamConsumer() {
 		for _, eventID := range eventIDs {
 
 			fmt.Println("Received Event from Timetable:", eventID)
-			response := webservice.HttpRequest("http://localhost:8090/events/"+eventID, false)
+			response := webservice.HttpRequest("http://localhost:8090/events/search?uid="+eventID, false)
 
 			err := json.Unmarshal(response, &event)
 			if err != nil {

@@ -36,10 +36,10 @@ func InitStream() {
 }
 
 // PublishEventsAsStream Publish a list of events as a stream
-func PublishEventsAsStream(eventUIDs []string) error {
+func PublishEventsAsStream(eventChanges []string) error {
 
 	// Convert the whole list to JSON
-	data, err := json.Marshal(eventUIDs)
+	data, err := json.Marshal(eventChanges)
 	if err != nil {
 		log.Println("Failed to encode event list:", err)
 		return err

@@ -52,14 +52,47 @@ const (
 	DELETE_EVENT = "DELETE FROM events WHERE id = ?"
 )
 
-func IsEventModified(existing *Event, newEvent *Event) bool {
-	return IsResourcesModified(existing.ResourceIDs, newEvent.ResourceIDs) ||
-		existing.Description != newEvent.Description ||
-		existing.Name != newEvent.Name ||
-		!existing.Start.Equal(newEvent.Start) ||
-		!existing.End.Equal(newEvent.End) ||
-		existing.Location != newEvent.Location ||
-		!existing.LastUpdate.Equal(newEvent.LastUpdate)
+func GetEventChanges(existing *Event, newEvent *Event) map[string]interface{} {
+	changes := make(map[string]interface{})
+
+	if existing.Description != newEvent.Description {
+		changes["Description"] = map[string]string{
+			"old": existing.Description,
+			"new": newEvent.Description,
+		}
+	}
+	if existing.Name != newEvent.Name {
+		changes["Name"] = map[string]string{
+			"old": existing.Name,
+			"new": newEvent.Name,
+		}
+	}
+	if !existing.Start.Equal(newEvent.Start) {
+		changes["Start"] = map[string]string{
+			"old": existing.Start.Format(time.RFC3339),
+			"new": newEvent.Start.Format(time.RFC3339),
+		}
+	}
+	if !existing.End.Equal(newEvent.End) {
+		changes["End"] = map[string]string{
+			"old": existing.End.Format(time.RFC3339),
+			"new": newEvent.End.Format(time.RFC3339),
+		}
+	}
+	if existing.Location != newEvent.Location {
+		changes["Location"] = map[string]string{
+			"old": existing.Location,
+			"new": newEvent.Location,
+		}
+	}
+	if !existing.LastUpdate.Equal(newEvent.LastUpdate) {
+		changes["LastUpdate"] = map[string]string{
+			"old": existing.LastUpdate.Format(time.RFC3339),
+			"new": newEvent.LastUpdate.Format(time.RFC3339),
+		}
+	}
+
+	return changes
 }
 
 // IsResourcesModified checks if two slices of UUIDs are equal (order does not matter)

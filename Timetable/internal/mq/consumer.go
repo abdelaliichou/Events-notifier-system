@@ -47,18 +47,18 @@ func StartStreamConsumer() {
 		}
 
 		// Process each event
-		var CreatedOrModifiedEvents []string
+		var CreatedOrModifiedEvents []map[string]interface{}
 		for i, event := range events {
 
 			models.DisplayEvents(event, i, true)
 
 			// Deciding if we add event to db or not
-			eventUID, err := UpsertEvent(event)
+			eventChanges, err := UpsertEvent(event)
 			if err != nil {
 				log.Println("❌ Failed to save event:", err)
 			} else {
-				if eventUID != "" {
-					CreatedOrModifiedEvents = append(CreatedOrModifiedEvents, eventUID)
+				if eventChanges != nil {
+					CreatedOrModifiedEvents = append(CreatedOrModifiedEvents, eventChanges)
 				}
 			}
 		}
@@ -83,7 +83,7 @@ func StartStreamConsumer() {
 
 // UpsertEvent is for checking if there's any modification and to see if we add it to db or not
 // and after this we need to add nats to send to alerter about anything changed in this db
-func UpsertEvent(event models.Event) (string, error) {
+func UpsertEvent(event models.Event) (map[string]interface{}, error) {
 	// Check if event exists using UID
 	existingEvent, err := repository.GetEventByUID(event.UID)
 
@@ -94,7 +94,7 @@ func UpsertEvent(event models.Event) (string, error) {
 		} else {
 			logrus.Errorf("Error fetching event by UID: %s", err.Error())
 			fmt.Println("-----")
-			return "", err
+			return nil, err
 		}
 	}
 
@@ -105,27 +105,31 @@ func UpsertEvent(event models.Event) (string, error) {
 		if err != nil {
 			logrus.Errorf("Error creating event: %s", err.Error())
 			fmt.Println("-----")
-			return "", err
+			return nil, err
 		}
 
 		// Insert resource IDs
 		err = repository.InsertEventResources(event.UID, event.ResourceIDs)
 		if err != nil {
 			logrus.Errorf("Error inserting resource IDs: %s", err.Error())
-			return "", err
+			return nil, err
 		}
 
 		fmt.Printf("Event with UID %s created successfully:\n", event.UID)
 		models.DisplayEvents(event, 0, false)
 
-		return event.UID, nil
+		return map[string]interface{}{
+			"uid":    event.UID,
+			"status": "created",
+		}, nil
 	}
 
-	// Event exists, check for modifications
-	if !models.IsEventModified(existingEvent, &event) {
+	// Check what has changed
+	changes := models.GetEventChanges(existingEvent, &event)
+	if len(changes) == 0 {
 		fmt.Printf("Event with UID %s exists but has no changes, skipping update.\n", event.UID)
 		fmt.Println("-----")
-		return "", nil
+		return nil, nil
 	}
 
 	// Update the existing event
@@ -134,27 +138,35 @@ func UpsertEvent(event models.Event) (string, error) {
 	err = Events.UpdateEvent(event)
 	if err != nil {
 		logrus.Errorf("Error updating event: %s", err.Error())
-		return "", err
+		return nil, err
 	}
 
 	// Update resource IDs
 	err = repository.UpdateEventResources(event.UID, event.ResourceIDs)
 	if err != nil {
 		logrus.Errorf("Error updating resource IDs: %s", err.Error())
-		return "", err
+		return nil, err
 	}
 
 	//fmt.Printf("Event updated successfully: %+v\n", event)
 	fmt.Printf("Event updated successfully:\n")
 	models.DisplayEvents(event, 0, false)
 
-	return event.UID, nil
+	return map[string]interface{}{
+		"uid":     event.UID,
+		"changes": changes,
+	}, nil
 }
 
 // sendModificationsToAlerter will send created/modified events to the Alerter as a stream to MQ
-func sendToAlerter(eventUIDs []string) {
+func sendToAlerter(eventChanges []map[string]interface{}) {
 
-	err := PublishEventsAsStream(eventUIDs)
+	if len(eventChanges) == 0 {
+		log.Println("No changes to alert.")
+		return
+	}
+
+	err := PublishEventsAsStream(eventChanges)
 	if err != nil {
 		log.Println("Error sending events to MQ:", err)
 		return
