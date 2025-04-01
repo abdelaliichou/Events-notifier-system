@@ -43,19 +43,6 @@ func GetAlertById(id uuid.UUID) (*models.Alert, error) {
 	return alert, nil
 }
 
-// UpdateAlert updates an existing alert
-func UpdateAlert(alert models.Alert) error {
-	err := repository.UpdateAlert(alert)
-	if err != nil {
-		logrus.Errorf("Error updating alert: %s", err.Error())
-		return &models.CustomError{
-			Message: "Error updating the alert",
-			Code:    http.StatusInternalServerError,
-		}
-	}
-	return nil
-}
-
 // CreateAlert creates a new alert in the database
 func CreateAlert(alert models.Alert) (*models.Alert, error) {
 	// generating a new ID
@@ -79,17 +66,4 @@ func CreateAlert(alert models.Alert) (*models.Alert, error) {
 	}
 
 	return &alert, nil
-}
-
-// DeleteAlert deletes an alert by its ID
-func DeleteAlert(id uuid.UUID) error {
-	err := repository.DeleteAlertById(id)
-	if err != nil {
-		logrus.Errorf("Error deleting alert: %s", err.Error())
-		return &models.CustomError{
-			Message: "Error deleting the alert",
-			Code:    http.StatusInternalServerError,
-		}
-	}
-	return nil
 }

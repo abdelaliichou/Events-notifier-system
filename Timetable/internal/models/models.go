@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Timetable represent un employ du temps
+// Event Timetable represent un emploi du temps
 type Event struct {
 	Id          *uuid.UUID   `json:"id"`
 	ResourceIDs []*uuid.UUID `json:"resourceIds"`

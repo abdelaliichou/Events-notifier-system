@@ -92,16 +92,3 @@ func CreatEvent(event models.Event) (*models.Event, error) {
 
 	return &event, nil
 }
-
-// DeleteEvent deletes an event by its ID
-func DeleteEvent(id uuid.UUID) error {
-	err := repository.DeleteEventById(id)
-	if err != nil {
-		logrus.Errorf("Error deleting event: %s", err.Error())
-		return &models.CustomError{
-			Message: "Error deleting the event",
-			Code:    http.StatusInternalServerError,
-		}
-	}
-	return nil
-}

@@ -35,8 +35,25 @@ func InitStream() {
 	fmt.Println("✅ Stream ALERTS created successfully")
 }
 
-// PublishEventsAsStream Publish a list of events as a stream
-func PublishEventsAsStream(eventChanges []string) error {
+// SendToAlerter will send created/modified events to the Alerter as a stream to MQ
+func SendToAlerter(eventChanges []map[string]interface{}) {
+
+	if len(eventChanges) == 0 {
+		log.Println("No changes to alert.")
+		return
+	}
+
+	err := publishEventsAsStream(eventChanges)
+	if err != nil {
+		log.Println("Error sending events to MQ:", err)
+		return
+	}
+
+	fmt.Println("✅ All events sent successfully to MQ")
+}
+
+// publishEventsAsStream Publish a list of events as a stream
+func publishEventsAsStream(eventChanges []map[string]interface{}) error {
 
 	// Convert the whole list to JSON
 	data, err := json.Marshal(eventChanges)

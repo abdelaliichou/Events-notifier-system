@@ -29,14 +29,3 @@ type Event struct {
 	Location    string       `json:"location"`
 	LastUpdate  time.Time    `json:"lastUpdate"`
 }
-
-type EmailContent struct {
-	Subject string
-	Body    string
-}
-
-type MailRequest struct {
-	Recipient string `json:"recipient"`
-	Subject   string `json:"subject"`
-	Content   string `json:"content"`
-}

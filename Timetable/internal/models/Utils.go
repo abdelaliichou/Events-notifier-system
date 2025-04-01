@@ -2,24 +2,15 @@ package models
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	"time"
 )
 
 // Constant static values
 const (
-	AppName            = "ICHOU_GoApp"
-	Version            = "1.0.0"
-	M1_GROUPE_1_lANGUE = "13295"
-	M1_GROUPE_2_lANGUE = "13345"
-	M1_GROUPE_3_lANGUE = "13397"
-	M1_GROUPE_1_OPTION = "7224"
-	M1_GROUPE_2_OPTION = "7225"
-	M1_GROUPE_3_OPTION = "62962"
-	M1_GROUPE_OPTION   = "62090"
-	M1_TUTORAT_L2      = "56529"
-	DB_NAME            = "file:timetable.db"
-	CREAT_EVENT        = `CREATE TABLE IF NOT EXISTS events (
+	AppName     = "ICHOU_GoApp"
+	Version     = "1.0.0"
+	DB_NAME     = "file:timetable.db"
+	CREAT_EVENT = `CREATE TABLE IF NOT EXISTS events (
 						  id TEXT PRIMARY KEY NOT NULL UNIQUE,
 						  uid TEXT NOT NULL UNIQUE, -- UID is unique
 						  description TEXT NOT NULL,
@@ -93,29 +84,6 @@ func GetEventChanges(existing *Event, newEvent *Event) map[string]interface{} {
 	}
 
 	return changes
-}
-
-// IsResourcesModified checks if two slices of UUIDs are equal (order does not matter)
-func IsResourcesModified(existingResources []*uuid.UUID, newResources []*uuid.UUID) bool {
-	if len(existingResources) != len(newResources) {
-		return true
-	}
-
-	// Convert both lists to UUID value sets for comparison
-	existingSet := make(map[uuid.UUID]bool)
-	for _, id := range existingResources {
-		if id != nil {
-			existingSet[*id] = true
-		}
-	}
-
-	for _, id := range newResources {
-		if id == nil || !existingSet[*id] {
-			return true
-		}
-	}
-
-	return false
 }
 
 func DisplayEvents(event Event, i int, all bool) {

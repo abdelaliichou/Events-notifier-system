@@ -33,15 +33,12 @@ func routes() {
 
 	// ---------------------- EVENTS ROUTES ----------------------
 	r.Route("/events", func(r chi.Router) {
-		//r.Post("/", eventsHandler.CreatEvent) // Create an event
 		r.Get("/", eventsHandler.GetEvents)              // Get all event
 		r.Get("/search", eventsHandler.SearchEventByUID) // Search event by UID
 
 		r.Route("/{id}", func(r chi.Router) {
 			//r.Use(eventsHandler.CtxAlert)      // Middleware to extract event ID
 			//r.Get("/", eventsHandler.GetEvent) // Get event by UID
-			//r.Put("/", eventsHandler.UpdateEvent) // Update event by ID
-			//r.Delete("/", eventsHandler.DeleteEvent) // Delete event by ID
 		})
 	})
 
@@ -51,11 +48,11 @@ func routes() {
 	// docker
 	// function to send only what have changed on the event -- DONE
 	// handle how to send the changes only in the mq from the consumer in the Timetable --DONE
-	// handle how to receive the changes from the consumer in config Timetable -- not yet ( done in chatgpt concerns consumer of config )
-	// handle how to send email structure with the changes
-	// send multiple emails to same person in case there where multiple changed events
-	// alerter dans un autre code
-	// separer le code MVC
+	// handle how to receive the changes from the consumer in config Timetable -- not yet ( done in chatgpt concerns consumer of config ) --DONE
+	// handle how to send email structure with the changes --DONE
+	// send multiple emails to same person in case there where multiple changed events --DONE
+	// alerter dans un autre code -- DONE
+	// separer le code MVC -- DONE
 
 	// Start the server
 	logrus.Info("[INFO] Web server started. Now listening on *:8090")

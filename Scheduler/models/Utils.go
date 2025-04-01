@@ -1,9 +1,12 @@
 package models
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/gofrs/uuid"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -23,6 +26,88 @@ func UCA_URL(nbWeeks string, resources []Resource) string {
 
 	return "https://edt.uca.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?resources=" + IDs +
 		"&projectId=2&calType=ical&" + nbWeeks + "=8&displayConfigId=128"
+}
+
+func ParsingEvents(data []byte, ResourceID *uuid.UUID, show bool) []Event {
+	// create line reader from data
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+
+	// create vars
+	var eventArray []map[string]string
+	currentEvent := map[string]string{}
+
+	currentKey := ""
+	currentValue := ""
+
+	inEvent := false
+
+	// inspecting each line
+	if show {
+		fmt.Printf("----------------  STARTING PREPARING DATA TO BE PARSED USING SCANNER :")
+	}
+	fmt.Printf("\n")
+	for scanner.Scan() {
+
+		// ignore calendar lines
+		if !inEvent && scanner.Text() != "BEGIN:VEVENT" {
+			continue
+		}
+
+		// if new event, go to next line
+		if scanner.Text() == "BEGIN:VEVENT" {
+			inEvent = true
+			currentEvent = map[string]string{}
+			continue
+		}
+
+		if scanner.Text() == "END:VEVENT" {
+			inEvent = false
+			eventArray = append(eventArray, currentEvent)
+			continue
+		}
+
+		if strings.HasPrefix(scanner.Text(), " ") {
+			currentEvent[currentKey] += scanner.Text()
+		} else {
+			// split scan
+			if show {
+				fmt.Printf("%s\n", scanner.Text())
+			}
+			splitted := strings.SplitN(scanner.Text(), ":", 2)
+			currentKey = splitted[0]
+			currentValue = splitted[1]
+
+			// store current event attribute
+			currentEvent[currentKey] = currentValue
+		}
+	}
+
+	var structuredEvents []Event
+	for _, event := range eventArray {
+
+		startTime, _ := time.Parse("20060102T150405Z", event["DTSTART"])
+		endTime, _ := time.Parse("20060102T150405Z", event["DTEND"])
+		lastModified, _ := time.Parse("20060102T150405Z", event["LAST-MODIFIED"])
+
+		structuredEvents = append(structuredEvents, Event{
+			Description: event["DESCRIPTION"],
+			Location:    event["LOCATION"],
+			UID:         event["UID"],
+			ResourceIDs: []*uuid.UUID{ResourceID},
+			Start:       startTime,
+			Name:        event["SUMMARY"],
+			End:         endTime,
+			LastUpdate:  lastModified,
+		})
+	}
+
+	// Print the structured events
+	if show {
+		fmt.Printf("\n----------------  THE PARSED EVENTS FROM THE CALENDAR RESPONSE : \n")
+		DisplayEvents(structuredEvents)
+	}
+
+	return structuredEvents
 }
 
 func DisplayEvents(events []Event) {

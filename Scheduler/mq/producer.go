@@ -38,8 +38,20 @@ func InitStream() {
 	log.Println("✅ Stream EVENTS created successfully")
 }
 
-// PublishEventsAsStream Publish a list of events as a stream
-func PublishEventsAsStream(events []models.Event) error {
+// SendEventsToMQ will send structured events to our producer as a stream to MQ
+func SendEventsToMQ(structuredEvents []models.Event) {
+
+	err := publishEventsAsStream(structuredEvents)
+	if err != nil {
+		log.Println("Error sending events to MQ:", err)
+		return
+	}
+
+	fmt.Println("All events sent successfully to MQ")
+}
+
+// publishEventsAsStream Publish a list of events as a stream
+func publishEventsAsStream(events []models.Event) error {
 
 	// Convert the whole list to JSON
 	data, err := json.Marshal(events)

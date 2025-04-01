@@ -223,32 +223,3 @@ func InsertEventResources(eventUID string, resourceIDs []*uuid.UUID) error {
 
 	return nil
 }
-
-// DeleteEventById deletes an event from the database by its ID
-func DeleteEventById(id uuid.UUID) error {
-	db, err := helpers.OpenDB()
-	if err != nil {
-		return err
-	}
-	defer helpers.CloseDB(db)
-
-	// Delete the event based on the ID
-	result, err := db.Exec(models.DELETE_EVENT, id.String())
-	if err != nil {
-		return err
-	}
-
-	// Check if any row was affected (if no rows were deleted, the event wasn't found)
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return &models.CustomError{
-			Message: "Event not found",
-			Code:    401,
-		}
-	}
-
-	return nil
-}

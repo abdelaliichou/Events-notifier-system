@@ -43,6 +43,7 @@ func StartStreamConsumer() {
 		}
 
 		if len(events) <= 0 {
+			// fmt.Println("NO EVENTS FROM SCHEDULER !")
 			return
 		}
 
@@ -67,7 +68,7 @@ func StartStreamConsumer() {
 		m.Ack()
 
 		// save the updated event so we send it to the Alerter using nats
-		sendToAlerter(CreatedOrModifiedEvents)
+		SendToAlerter(CreatedOrModifiedEvents)
 
 	}, nats.Durable("event-consumer"), nats.ManualAck())
 
@@ -82,7 +83,6 @@ func StartStreamConsumer() {
 }
 
 // UpsertEvent is for checking if there's any modification and to see if we add it to db or not
-// and after this we need to add nats to send to alerter about anything changed in this db
 func UpsertEvent(event models.Event) (map[string]interface{}, error) {
 	// Check if event exists using UID
 	existingEvent, err := repository.GetEventByUID(event.UID)
@@ -148,7 +148,6 @@ func UpsertEvent(event models.Event) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	//fmt.Printf("Event updated successfully: %+v\n", event)
 	fmt.Printf("Event updated successfully:\n")
 	models.DisplayEvents(event, 0, false)
 
@@ -156,21 +155,4 @@ func UpsertEvent(event models.Event) (map[string]interface{}, error) {
 		"uid":     event.UID,
 		"changes": changes,
 	}, nil
-}
-
-// sendModificationsToAlerter will send created/modified events to the Alerter as a stream to MQ
-func sendToAlerter(eventChanges []map[string]interface{}) {
-
-	if len(eventChanges) == 0 {
-		log.Println("No changes to alert.")
-		return
-	}
-
-	err := PublishEventsAsStream(eventChanges)
-	if err != nil {
-		log.Println("Error sending events to MQ:", err)
-		return
-	}
-
-	fmt.Println("✅ All events sent successfully to MQ")
 }

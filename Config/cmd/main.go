@@ -8,14 +8,10 @@ import (
 	resourcesHandler "middleware/example/internal/controllers/resources"
 	"middleware/example/internal/helpers"
 	"middleware/example/internal/models"
-	"middleware/example/internal/mq"
 	"net/http"
 )
 
 func main() {
-
-	// starting Alerts consumer
-	go mq.StartStreamConsumer()
 
 	routes()
 
@@ -35,10 +31,8 @@ func routes() {
 		r.Get("/", alertsHandler.GetAlerts)    // Get all alerts
 
 		r.Route("/{id}", func(r chi.Router) {
-			r.Use(alertsHandler.CtxAlert)            // Middleware to extract alert ID
-			r.Get("/", alertsHandler.GetAlert)       // Get alert by ID
-			r.Put("/", alertsHandler.UpdateAlert)    // Update alert by ID
-			r.Delete("/", alertsHandler.DeleteAlert) // Delete alert by ID
+			r.Use(alertsHandler.CtxAlert)      // Middleware to extract alert ID
+			r.Get("/", alertsHandler.GetAlert) // Get alert by ID
 		})
 	})
 
