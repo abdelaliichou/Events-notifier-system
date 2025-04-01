@@ -4,6 +4,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "middleware/example/docs"
 	alertsHandler "middleware/example/internal/controllers/alerts"
 	resourcesHandler "middleware/example/internal/controllers/resources"
 	"middleware/example/internal/helpers"
@@ -11,9 +13,16 @@ import (
 	"net/http"
 )
 
+// @title          Alerts & Resources API
+// @version        1.0
+// @description    API for managing alerts and resources
+// @host           localhost:8080
+// @BasePath       /alerts & /resources
+
 func main() {
 
 	routes()
+	// swagger documentation : http://localhost:8080/swagger/index.html
 
 }
 
@@ -24,6 +33,11 @@ func routes() {
 	// Middleware for logging and recovery
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
+	// ---------------------- SWAGGER ROUTES ----------------------
+	r.Route("/swagger", func(r chi.Router) {
+		r.Get("/*", httpSwagger.WrapHandler)
+	})
 
 	// ---------------------- ALERT ROUTES ----------------------
 	r.Route("/alerts", func(r chi.Router) {

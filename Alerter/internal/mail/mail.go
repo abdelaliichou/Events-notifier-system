@@ -37,18 +37,18 @@ func PreparingMail(mail string, events []models.Event, eventChanges map[string]m
 			newValue, newExists := changeMap["new"].(string)
 
 			if oldExists && newExists {
-				mailBody.WriteString(fmt.Sprintf("Field \"%s\": \n    Avant: %s\n    Après: %s\n\n", field, oldValue, newValue))
+				mailBody.WriteString(fmt.Sprintf("- %s: \n    - Avant: \"%s\"\n    - Après: \"%s\"\n\n", field, oldValue, newValue))
 			}
 		}
 
 		// Add event details
 		mailBody.WriteString("\nDétails : \n")
-		mailBody.WriteString(fmt.Sprintf("Nom : %s\n", event.Name))
-		mailBody.WriteString(fmt.Sprintf("Description : %s\n", event.Description))
-		mailBody.WriteString(fmt.Sprintf("Début : %s\n", event.Start.Format("2006-01-02 15:04:05")))
-		mailBody.WriteString(fmt.Sprintf("Fin : %s\n", event.End.Format("2006-01-02 15:04:05")))
-		mailBody.WriteString(fmt.Sprintf("Lieu : %s\n", event.Location))
-		mailBody.WriteString(fmt.Sprintf("Dernière mise à jour : %s\n\n", event.LastUpdate.Format("2006-01-02 15:04:05")))
+		mailBody.WriteString(fmt.Sprintf("- Nom : %s\n", event.Name))
+		mailBody.WriteString(fmt.Sprintf("- Description : %s\n", event.Description))
+		mailBody.WriteString(fmt.Sprintf("- Début : %s\n", event.Start.Format("2006-01-02 15:04:05")))
+		mailBody.WriteString(fmt.Sprintf("- Fin : %s\n", event.End.Format("2006-01-02 15:04:05")))
+		mailBody.WriteString(fmt.Sprintf("- Lieu : %s\n", event.Location))
+		mailBody.WriteString(fmt.Sprintf("- Dernière mise à jour : %s\n\n", event.LastUpdate.Format("2006-01-02 15:04:05")))
 
 		mailBody.WriteString("Cordialement,\nAbdelali ichou du L'équipe P&G Innovations\n")
 		//mailBody.WriteString("------------------------------------------------------\n")

@@ -1,0 +1,197 @@
+basePath: /alerts & /resources
+definitions:
+  models.Alert:
+    properties:
+      all:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: string
+      resourceID:
+        description: Always present, but can be null
+        type: string
+    type: object
+  models.Resource:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      ucaID:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing alerts and resources
+  title: Alerts & Resources API
+  version: "1.0"
+paths:
+  /alerts:
+    get:
+      description: Retrieve a list of all alerts
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Alert'
+            type: array
+        "500":
+          description: Internal server error
+      summary: Get all alerts
+      tags:
+      - alerts
+    post:
+      consumes:
+      - application/json
+      description: This endpoint creates a new alert
+      parameters:
+      - description: Alert Data
+        in: body
+        name: alert
+        required: true
+        schema:
+          $ref: '#/definitions/models.Alert'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Alert'
+        "400":
+          description: Invalid request body
+        "500":
+          description: Error creating alert
+      summary: Create a new alert
+      tags:
+      - alerts
+  /alerts/{id}:
+    get:
+      description: Retrieve a specific alert using its unique ID
+      parameters:
+      - description: Alert UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Alert'
+        "404":
+          description: Alert not found
+        "500":
+          description: Internal server error
+      summary: Get an alert by ID
+      tags:
+      - alerts
+  /resources:
+    get:
+      description: Retrieve all resources from the service layer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Resource'
+            type: array
+        "500":
+          description: Error fetching resources
+      summary: Get all resources
+      tags:
+      - resources
+    post:
+      consumes:
+      - application/json
+      description: This endpoint creates a new resource based on the request body.
+      parameters:
+      - description: Resource Data
+        in: body
+        name: resource
+        required: true
+        schema:
+          $ref: '#/definitions/models.Resource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Resource'
+        "400":
+          description: Invalid request body
+        "500":
+          description: Error creating resource
+      summary: Create a new resource
+      tags:
+      - resources
+  /resources/{id}:
+    delete:
+      description: This endpoint deletes a resource using its unique ID
+      parameters:
+      - description: Resource UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Error deleting resource
+      summary: Delete a resource by ID
+      tags:
+      - resources
+    get:
+      description: Retrieve a resource using its unique ID
+      parameters:
+      - description: Resource UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Resource'
+        "404":
+          description: Resource not found
+        "500":
+          description: Internal server error
+      summary: Get a resource by ID
+      tags:
+      - resources
+    put:
+      description: This endpoint updates an existing resource with the provided details.
+      parameters:
+      - description: Resource UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Resource Data
+        in: body
+        name: resource
+        required: true
+        schema:
+          $ref: '#/definitions/models.Resource'
+      responses:
+        "200":
+          description: Resource updated successfully
+        "400":
+          description: Invalid request body
+        "404":
+          description: Resource not found
+        "500":
+          description: Error updating resource
+      summary: Update an existing resource by ID
+      tags:
+      - resources
+swagger: "2.0"

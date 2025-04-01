@@ -8,7 +8,13 @@ import (
 	"net/http"
 )
 
-// GetAlerts retrieves all alerts and returns them as JSON
+// GetAlerts
+// @Tags         alerts
+// @Summary      Get all alerts
+// @Description  Retrieve a list of all alerts
+// @Success      200 {array} models.Alert
+// @Failure      500 "Internal server error"
+// @Router       /alerts [get]
 func GetAlerts(w http.ResponseWriter, r *http.Request) {
 	// Fetch the alerts from the service layer
 	// we don't use context because we don't need IDs, we all the alerts

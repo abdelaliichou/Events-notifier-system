@@ -9,6 +9,15 @@ import (
 	"net/http"
 )
 
+// GetResource
+// @Tags         resources
+// @Summary      Get a resource by ID
+// @Description  Retrieve a resource using its unique ID
+// @Param        id path string true "Resource UUID"
+// @Success      200 {object} models.Resource
+// @Failure      404 "Resource not found"
+// @Failure      500 "Internal server error"
+// @Router       /resources/{id} [get]
 func GetResource(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	resourceID, _ := ctx.Value("resourceID").(uuid.UUID)

@@ -4,12 +4,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "middleware/example/docs"
 	eventsHandler "middleware/example/internal/controllers/events"
 	"middleware/example/internal/helpers"
 	"middleware/example/internal/models"
 	"middleware/example/internal/mq"
 	"net/http"
 )
+
+// @title          Events Timetable API
+// @version        1.0
+// @description    API for managing events in the timetable
+// @host           localhost:8090
+// @BasePath       /events
 
 func main() {
 
@@ -21,6 +29,8 @@ func main() {
 
 	routes()
 
+	// swagger documentation : http://localhost:8090/swagger/index.html/index.html
+
 }
 
 func routes() {
@@ -30,6 +40,11 @@ func routes() {
 	// Middleware for logging and recovery
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
+	// ---------------------- SWAGGER ROUTES ----------------------
+	r.Route("/swagger", func(r chi.Router) {
+		r.Get("/*", httpSwagger.WrapHandler)
+	})
 
 	// ---------------------- EVENTS ROUTES ----------------------
 	r.Route("/events", func(r chi.Router) {
@@ -43,8 +58,8 @@ func routes() {
 	})
 
 	// readme
-	// events?uid=		-- DONE
-	// swagger
+	// events?uid=	-- DONE
+	// swagger	-- DONE
 	// docker
 	// function to send only what have changed on the event -- DONE
 	// handle how to send the changes only in the mq from the consumer in the Timetable --DONE

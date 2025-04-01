@@ -8,7 +8,16 @@ import (
 	"net/http"
 )
 
-// SearchEventByUID retrieves an event from the database using the Event UID from the search args
+// SearchEventByUID
+// @Tags         events
+// @Summary      Search for an event by UID
+// @Description  This endpoint returns an event by its unique ID
+// @Param        uid query string true "Event UID"
+// @Success      200 {object} models.Event
+// @Failure      400 "Missing UID query parameter"
+// @Failure      404 "Event not found"
+// @Failure      500 "Error fetching event"
+// @Router       /events [get]
 func SearchEventByUID(w http.ResponseWriter, r *http.Request) {
 	eventUID := r.URL.Query().Get("uid")
 	if eventUID == "" {

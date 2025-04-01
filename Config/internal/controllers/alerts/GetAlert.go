@@ -9,7 +9,15 @@ import (
 	"net/http"
 )
 
-// GetAlert retrieves an alert from the database using the Alert ID from the context
+// GetAlert
+// @Tags         alerts
+// @Summary      Get an alert by ID
+// @Description  Retrieve a specific alert using its unique ID
+// @Param        id path string true "Alert UUID"
+// @Success      200 {object} models.Alert
+// @Failure      404 "Alert not found"
+// @Failure      500 "Internal server error"
+// @Router       /alerts/{id} [get]
 func GetAlert(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	alertID, _ := ctx.Value("alertID").(uuid.UUID)

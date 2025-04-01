@@ -1,0 +1,56 @@
+basePath: /events
+definitions:
+  models.Event:
+    properties:
+      description:
+        type: string
+      end:
+        type: string
+      id:
+        type: string
+      lastUpdate:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      resourceIds:
+        items:
+          type: string
+        type: array
+      start:
+        type: string
+      uid:
+        type: string
+    type: object
+host: localhost:8090
+info:
+  contact: {}
+  description: API for managing events in the timetable
+  title: Events Timetable API
+  version: "1.0"
+paths:
+  /events:
+    get:
+      description: This endpoint returns an event by its unique ID
+      parameters:
+      - description: Event UID
+        in: query
+        name: uid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Event'
+        "400":
+          description: Missing UID query parameter
+        "404":
+          description: Event not found
+        "500":
+          description: Error fetching event
+      summary: Search for an event by UID
+      tags:
+      - events
+swagger: "2.0"

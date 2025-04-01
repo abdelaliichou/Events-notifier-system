@@ -8,6 +8,14 @@ import (
 	"net/http"
 )
 
+// DeleteResource
+// @Tags         resources
+// @Summary      Delete a resource by ID
+// @Description  This endpoint deletes a resource using its unique ID
+// @Param        id path string true "Resource UUID"
+// @Success      200 {object} string
+// @Failure      500 "Error deleting resource"
+// @Router       /resources/{id} [delete]
 func DeleteResource(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	resourceID, _ := ctx.Value("resourceID").(uuid.UUID)
@@ -22,6 +30,6 @@ func DeleteResource(w http.ResponseWriter, r *http.Request) {
 
 	// Return success response (200 OK)
 	w.WriteHeader(http.StatusOK)
-	body, _ := json.Marshal(map[string]string{"message": "Resource deleted successfully"})
+	body, _ := json.Marshal("Resource deleted successfully")
 	_, _ = w.Write(body)
 }

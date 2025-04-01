@@ -8,7 +8,13 @@ import (
 	"net/http"
 )
 
-// GetEvents retrieves all events and returns them as JSON
+// GetEvents
+// @Tags         events
+// @Summary      Get all events
+// @Description  This endpoint returns a list of all events
+// @Success      200 {array} models.Event
+// @Failure      500 "Error fetching events"
+// @Router       /events [get]
 func GetEvents(w http.ResponseWriter, r *http.Request) {
 	// Fetch the events from the service layer
 	// we don't use context because we don't need IDs
