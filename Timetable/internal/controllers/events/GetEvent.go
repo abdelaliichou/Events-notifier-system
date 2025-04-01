@@ -3,7 +3,6 @@ package collections
 import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
-	"log"
 	"middleware/example/internal/models"
 	"middleware/example/internal/services/events"
 	"net/http"
@@ -16,8 +15,6 @@ func SearchEventByUID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing uid query parameter", http.StatusBadRequest)
 		return
 	}
-
-	log.Println("SEARCHIIIIIIIIIING IN /EVENTS/SEARCH?UID=", eventUID)
 
 	// Fetch the event from the service layer
 	event, err := events.GetEventByID(eventUID)

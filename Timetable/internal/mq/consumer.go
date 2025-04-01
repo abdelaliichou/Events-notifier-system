@@ -43,7 +43,10 @@ func StartStreamConsumer() {
 		}
 
 		if len(events) <= 0 {
-			// fmt.Println("NO EVENTS FROM SCHEDULER !")
+			fmt.Println("NO EVENTS FROM SCHEDULER !")
+			// this 2 lines are just for testing since the year has finished for us as students so there's no new events
+			// fmt.Println("STARTING THE TESTING !!!!!!!!!!")
+			// events = models.TestFunction()
 			return
 		}
 
@@ -57,10 +60,10 @@ func StartStreamConsumer() {
 			eventChanges, err := UpsertEvent(event)
 			if err != nil {
 				log.Println("❌ Failed to save event:", err)
-			} else {
-				if eventChanges != nil {
-					CreatedOrModifiedEvents = append(CreatedOrModifiedEvents, eventChanges)
-				}
+				continue
+			}
+			if eventChanges != nil {
+				CreatedOrModifiedEvents = append(CreatedOrModifiedEvents, eventChanges)
 			}
 		}
 

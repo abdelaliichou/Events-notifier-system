@@ -100,3 +100,27 @@ func DisplayEvents(event Event, i int, all bool) {
 	fmt.Printf("  Last Update: %s\n", event.LastUpdate.Format(time.RFC3339))
 	fmt.Println("-----")
 }
+
+// TestFunction generates test events
+func TestFunction() []Event {
+	return []Event{
+		{
+			UID:         "12345",
+			Name:        "Updated Exam ICHOU 10",
+			Description: "New description 10",
+			Start:       time.Now(),
+			End:         time.Now().Add(2 * time.Hour),
+			Location:    "New Location 10",
+			LastUpdate:  time.Now(),
+		},
+		{
+			UID:         "67890",
+			Name:        "New Seminar ICHOU 10",
+			Description: "Seminar on AI 10",
+			Start:       time.Now().Add(24 * time.Hour),
+			End:         time.Now().Add(26 * time.Hour),
+			Location:    "HallC 10",
+			LastUpdate:  time.Now(),
+		},
+	}
+}

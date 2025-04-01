@@ -16,27 +16,33 @@ func PreparingMail(mail string, events []models.Event, eventChanges map[string]m
 
 		mailBody.WriteString(fmt.Sprintf("Bonjour.\n\nÉvénement %s a été modifié.\n\n", event.Name))
 
-		changes, exists := eventChanges[event.UID]
+		eventData, exists := eventChanges[event.UID]
 		if !exists {
 			continue
 		}
 
-		// Format changes
-		mailBody.WriteString("Changements apportés\n")
+		changes, hasChanges := eventData["changes"].(map[string]interface{})
+		if !hasChanges {
+			continue
+		}
+
+		mailBody.WriteString("Les changements apportés : \n\n")
 		for field, change := range changes {
-			if field == "uid" {
-				continue
-			}
-			changeMap, ok := change.(map[string]string)
+			changeMap, ok := change.(map[string]interface{})
 			if !ok {
 				continue
 			}
 
-			mailBody.WriteString(fmt.Sprintf("%s\nAvant\n%s\nAprès\n%s\n\n", field, changeMap["old"], changeMap["new"]))
+			oldValue, oldExists := changeMap["old"].(string)
+			newValue, newExists := changeMap["new"].(string)
+
+			if oldExists && newExists {
+				mailBody.WriteString(fmt.Sprintf("Field \"%s\": \n    Avant: %s\n    Après: %s\n\n", field, oldValue, newValue))
+			}
 		}
 
 		// Add event details
-		mailBody.WriteString("Détails\n\n")
+		mailBody.WriteString("\nDétails : \n")
 		mailBody.WriteString(fmt.Sprintf("Nom : %s\n", event.Name))
 		mailBody.WriteString(fmt.Sprintf("Description : %s\n", event.Description))
 		mailBody.WriteString(fmt.Sprintf("Début : %s\n", event.Start.Format("2006-01-02 15:04:05")))
@@ -44,11 +50,11 @@ func PreparingMail(mail string, events []models.Event, eventChanges map[string]m
 		mailBody.WriteString(fmt.Sprintf("Lieu : %s\n", event.Location))
 		mailBody.WriteString(fmt.Sprintf("Dernière mise à jour : %s\n\n", event.LastUpdate.Format("2006-01-02 15:04:05")))
 
-		mailBody.WriteString("Cordialement,\nAbdelali ichou du L'équipe P&G Innovations Forestier & Justine\n")
-		mailBody.WriteString("------------------------------------------------------\n")
+		mailBody.WriteString("Cordialement,\nAbdelali ichou du L'équipe P&G Innovations\n")
+		//mailBody.WriteString("------------------------------------------------------\n")
 
 		// Send mail
-		fmt.Printf("📧 Sending mail to %s:\n%s\n", mail, mailBody.String())
+		// fmt.Printf("📧 Sending mail to %s:\n%s\n", mail, mailBody.String())
 		sendMail(mail, mailBody.String())
 	}
 }

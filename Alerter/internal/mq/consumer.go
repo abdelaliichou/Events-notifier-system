@@ -71,7 +71,7 @@ func StartStreamConsumer() {
 				continue
 			}
 
-			fmt.Println("Received Event from Timetable:", eventUID)
+			// fmt.Println("Received Event from Timetable:", eventUID)
 			response := webservice.HttpRequest("http://localhost:8090/events/search?uid="+eventUID, false)
 
 			err := json.Unmarshal(response, &event)
@@ -127,7 +127,7 @@ func getAlerts(events []models.Event, eventChanges map[string]map[string]interfa
 
 	// Print the parsed data
 	fmt.Println("\nGetting all alerts from Config : ", models.CONFIG_ALERT_URL)
-	models.DisplayAlerts(alerts)
+	// models.DisplayAlerts(alerts)
 
 	handlingAlerts(alerts, events, eventChanges)
 }
