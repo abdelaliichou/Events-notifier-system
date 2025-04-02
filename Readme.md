@@ -10,7 +10,8 @@
    - [Alerter Service](#alerter-service)  
 4. [Message Queue (NATS JetStream)](#message-queue-nats-jetstream)  
 5. [Running the Project](#running-the-project)  
-6. [License & Contributors](#license--contributors)  
+6. [Screenshots exemples](#Screenshots-exemples)  
+7. [License & Contributors](#license--contributors)  
 
 ---
 
@@ -175,7 +176,22 @@ Running at: `nats://nats-server:4222`
 docker-compose up --build
 ```
 
+
 ---
+
+
+
+## **Screenshots Exemples**  
+![Running image](https://github.com/abdelaliichou/Events-notifier-system/blob/main/screenshots/running.png)
+![Started images](https://github.com/abdelaliichou/Events-notifier-system/blob/main/screenshots/started.png)
+![Stopped images](https://github.com/abdelaliichou/Events-notifier-system/blob/main/screenshots/stopped.png)
+
+
+
+
+---
+
+
 
 ## **License & Contributors**  
 
