@@ -1,4 +1,4 @@
-# **Project Documentation: UCA Events notifier System**
+# **Project Documentation: UCA Events Notifier System**
 
 ## **Table of Contents**  
 1. [Getting Started](#getting-started)  

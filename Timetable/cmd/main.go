@@ -57,18 +57,6 @@ func routes() {
 		})
 	})
 
-	// readme
-	// events?uid=	-- DONE
-	// swagger	-- DONE
-	// docker -- DONE
-	// function to send only what have changed on the event -- DONE
-	// handle how to send the changes only in the mq from the consumer in the Timetable --DONE
-	// handle how to receive the changes from the consumer in config Timetable -- not yet ( done in chatgpt concerns consumer of config ) --DONE
-	// handle how to send email structure with the changes --DONE
-	// send multiple emails to same person in case there where multiple changed events --DONE
-	// alerter dans un autre code -- DONE
-	// separer le code MVC -- DONE
-
 	// Start the server
 	logrus.Info("[INFO] Web server started. Now listening on *:8090")
 	logrus.Fatalln(http.ListenAndServe(":8090", r))
