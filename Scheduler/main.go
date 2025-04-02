@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// to run this file => go run .
+// github repo : https://github.com/abdelaliichou/Events-notifier-system
 
 func main() {
 

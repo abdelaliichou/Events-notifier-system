@@ -23,6 +23,7 @@ func main() {
 
 	routes()
 	// swagger documentation : http://localhost:8080/swagger/index.html
+	// github repo : https://github.com/abdelaliichou/Events-notifier-system
 
 }
 
