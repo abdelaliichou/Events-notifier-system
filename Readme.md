@@ -1,4 +1,4 @@
-# **Project Documentation: Event Management System**
+# **Project Documentation: UCA Events notifier System**
 
 ## **Table of Contents**  
 1. [Getting Started](#getting-started)  
@@ -9,9 +9,8 @@
    - [Timetable Service](#timetable-service)  
    - [Alerter Service](#alerter-service)  
 4. [Message Queue (NATS JetStream)](#message-queue-nats-jetstream)  
-5. [Database Schema](#database-schema)  
-6. [Running the Project](#running-the-project)  
-7. [License & Contributors](#license--contributors)  
+5. [Running the Project](#running-the-project)  
+6. [License & Contributors](#license--contributors)  
 
 ---
 
@@ -71,8 +70,8 @@ The **Config Service** manages:
 - `DELETE /resources/{id}/` → Delete a resource  
 
 ##### **Swagger Documentation**  
-- **Standalone**: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)  
-- **Dockerized**: [http://config:8080/swagger/index.html](http://config:8080/swagger/index.html)  
+- **Local**: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)  
+- **Docker**: [http://config:8080/swagger/index.html](http://config:8080/swagger/index.html)  
 
 ---
 
@@ -120,8 +119,8 @@ GET /events/search?uid={event_uid}
 ```
 
 ##### **Swagger Docs**  
-- **Local:** [Swagger UI](http://localhost:8090/swagger/index.html)  
-- **Docker:** [Swagger UI](http://timetable:8090/swagger/index.html)  
+- **Local:** [http://localhost:8090/swagger/index.html](http://localhost:8090/swagger/index.html)  
+- **Docker:** [http://timetable:8090/swagger/index.html](http://timetable:8090/swagger/index.html)  
 
 #### **NATS Communication**  
 - **Subscribes to:** `EVENTS.stream` (receives events)  
@@ -164,20 +163,10 @@ go run main.go
 
 ### **NATS Server**  
 Running at: `nats://nats-server:4222`  
-
+ 
+ 
 ---
 
-## **Database Schema**  
-
-### **Events Table**  
-| Column       | Type         | Description |
-|-------------|-------------|-------------|
-| `id`        | UUID        | Unique event ID |
-| `uid`       | VARCHAR(255)| Unique event UID |
-| `title`     | TEXT        | Event title |
-| `resourceIDs` | JSON       | List of associated resources |
-
----
 
 ## **Running the Project**  
 
