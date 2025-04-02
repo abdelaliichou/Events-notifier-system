@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  nats-server:
+    image: nats:latest
+    command: --jetstream
+    volumes:
+      - nats-data:/data  # Persistent storage for JetStream
+    ports:
+      - "4222:4222"
+      - "8222:8222"  # Optional monitoring port
+    restart: always
+    networks:
+      - microservices_network 
+      
+  config:
+    build: 
+      context : Config/.
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices_network
+      
+  timetable:
+    build: 
+      context : Timetable/.
+      dockerfile: Dockerfile    
+    ports:
+      - "8090:8090"
+    depends_on:
+      - scheduler          
+    networks:
+      - microservices_network
+
+  alerter:
+    build: 
+      context : Alerter/.
+      dockerfile: Dockerfile    
+    depends_on:
+      - timetable
+      - config  
+    networks:
+      - microservices_network
+
+  scheduler:
+    build: 
+      context : Scheduler/.
+      dockerfile: Dockerfile    
+    depends_on:
+      - config       
+    networks:
+      - microservices_network
+
+volumes:
+  nats-data:
+  
+networks:
+  microservices_network:
+    driver: bridge

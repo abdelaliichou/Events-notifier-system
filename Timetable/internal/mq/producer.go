@@ -12,7 +12,8 @@ func InitStream() {
 
 	// Connect to NATS server
 	var err error
-	nc, err := nats.Connect(nats.DefaultURL)
+	//nc, err := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect("nats://nats-server:4222")
 	if err != nil {
 		log.Fatal("❌ Failed to connect to Alerts NATS:", err)
 	}

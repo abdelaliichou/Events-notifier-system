@@ -27,7 +27,8 @@ func ensureStreamExists() error {
 func StartStreamConsumer() {
 	// Connect to NATS server
 	var err error
-	nc, err := nats.Connect(nats.DefaultURL)
+	//nc, err := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect("nats://nats-server:4222")
 	if err != nil {
 		log.Fatal("❌ Failed to connect to ALERTS NATS:", err)
 	}
@@ -72,7 +73,7 @@ func StartStreamConsumer() {
 			}
 
 			// fmt.Println("Received Event from Timetable:", eventUID)
-			response := webservice.HttpRequest("http://localhost:8090/events/search?uid="+eventUID, false)
+			response := webservice.HttpRequest("http://timetable:8090/events/search?uid="+eventUID, false)
 
 			err := json.Unmarshal(response, &event)
 			if err != nil {

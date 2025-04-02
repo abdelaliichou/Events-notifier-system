@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	CONFIG_PATH = "http://localhost:8080/resources/"
+	CONFIG_PATH = "http://config:8080/resources/"
 )
 
 func UCA_URL(nbWeeks string, resources []Resource) string {

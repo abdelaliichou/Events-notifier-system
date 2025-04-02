@@ -9,7 +9,7 @@ import (
 // Constant static values
 const (
 	MailAPI          = "https://mail-api.edu.forestier.re/mail"
-	CONFIG_ALERT_URL = "http://localhost:8080/alerts/"
+	CONFIG_ALERT_URL = "http://config:8080/alerts/"
 )
 
 func DisplayEvents(events []Event) {
