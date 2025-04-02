@@ -196,7 +196,7 @@ docker-compose up --build
 ## **License & Contributors**  
 
 ### **Contributors**  
-- **ICHOU Abdelali** - [GitHub Profile](https://github.com/abdelaliichou)  
+- **ICHOU Abdelali & BOUCHIKHI Rim** - [GitHub Profile](https://github.com/abdelaliichou)  
 
 ### **License**  
 This project is licensed under the **MIT License**.
