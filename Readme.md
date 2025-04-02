@@ -1,5 +1,7 @@
 # **Project Documentation: UCA Events Notifier System**
 
+- **Github repo**: [https://github.com/abdelaliichou/Events-notifier-system](https://github.com/abdelaliichou/Events-notifier-system)  
+
 ## **Table of Contents**  
 1. [Getting Started](#getting-started)  
 2. [Architecture Overview](#architecture-overview)  
