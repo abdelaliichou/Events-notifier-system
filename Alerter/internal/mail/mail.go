@@ -9,6 +9,7 @@ import (
 )
 
 func PreparingMail(mail string, events []models.Event, eventChanges map[string]map[string]interface{}, all bool) {
+
 	// Loop through each event and format the changes
 	for _, event := range events {
 
@@ -18,12 +19,14 @@ func PreparingMail(mail string, events []models.Event, eventChanges map[string]m
 
 		eventData, exists := eventChanges[event.UID]
 		if !exists {
+			fmt.Printf("No changement in event %s for user %s \n", event.Name, mail)
 			continue
 		}
 
 		changes, hasChanges := eventData["changes"].(map[string]interface{})
 		if !hasChanges {
-			continue
+			// for testing purposes i have commented the next line -> even if there's no changments, the mail will be sent
+			// continue
 		}
 
 		mailBody.WriteString("Les changements apportés : \n\n")
@@ -61,7 +64,7 @@ func PreparingMail(mail string, events []models.Event, eventChanges map[string]m
 
 func sendMail(mail string, content string) {
 	// Token required for the API
-	token := "PueiQkxDnrLjMHlFzfVVUCojDPTlZchQeRWecXTk"
+	token := "HDBlinMhCNaASpzouzsPoEmQoCLbPDoSaMfGwqox"
 
 	// Example event data
 	event := struct {

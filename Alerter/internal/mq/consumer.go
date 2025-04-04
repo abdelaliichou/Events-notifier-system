@@ -128,7 +128,8 @@ func getAlerts(events []models.Event, eventChanges map[string]map[string]interfa
 
 	// Print the parsed data
 	fmt.Println("\nGetting all alerts from Config : ", models.CONFIG_ALERT_URL)
-	// models.DisplayAlerts(alerts)
+	//models.DisplayAlerts(alerts)
+	//models.DisplayEvents(events)
 
 	handlingAlerts(alerts, events, eventChanges)
 }
@@ -136,6 +137,7 @@ func getAlerts(events []models.Event, eventChanges map[string]map[string]interfa
 func handlingAlerts(alerts []models.Alert, events []models.Event, eventChanges map[string]map[string]interface{}) {
 	for _, alert := range alerts {
 		if alert.IsAll {
+			fmt.Printf("User with email %s is subscribed to all events\n", alert.Email)
 			mail.PreparingMail(alert.Email, events, eventChanges, true)
 			continue
 		}

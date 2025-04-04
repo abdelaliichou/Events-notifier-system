@@ -1,0 +1,415 @@
+{
+	"info": {
+		"_postman_id": "d05551c2-c724-40c4-81f9-77b023c32615",
+		"name": "Middleware Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25932615"
+	},
+	"item": [
+		{
+			"name": "Alerts",
+			"item": [
+				{
+					"name": "delete alert",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/alerts/129662f6-8989-48eb-ab77-6b1adef27f37",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alerts",
+								"129662f6-8989-48eb-ab77-6b1adef27f37"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get alert by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alerts/04b92b00-407d-47c9-945c-b54c9b763db8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alerts",
+								"04b92b00-407d-47c9-945c-b54c9b763db8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update alert",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"testClermontUPDATED@esi-sba.dz\",\n    \"all\" : true,\n    \"resourceID\" : \"19100aed-0363-4f80-9679-5c1350403122\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alerts/129662f6-8989-48eb-ab77-6b1adef27f37",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alerts",
+								"129662f6-8989-48eb-ab77-6b1adef27f37"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create alert",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"a.ichou@esi-sba.dz\",\n    \"all\" : false,\n    \"resourceID\" : \"07458f40-b39b-43bc-8337-437030eb9e1a\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/alerts/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alerts",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get alerts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/alerts/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"alerts",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "get event by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8090/events/ADE60323032342d323032352d5543412d3130393232392d322d30",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"events",
+								"ADE60323032342d323032352d5543412d3130393232392d322d30"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/events/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"events",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/events/9a5c038e-cc5b-4709-9752-22b7fa47b29e",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"events",
+								"9a5c038e-cc5b-4709-9752-22b7fa47b29e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\n        \"resourceIds\": [\n        ],\n        \"uid\": \"ADE60323032342d323032352d5543412d3130393232392d322d30\",\n        \"description\": \"\\\\n\\\\nM1 Groupe option\\\\nGADOUX EMILIEN\\\\n\\\\n(Updated :05/03/2025  11:37)\",\n        \"name\": \"TD groupe Technologie Réseaux neurones ichou\",\n        \"start\": \"2025-03-06T14:45:00Z\",\n        \"end\": \"2025-03-06T16:45:00Z\",\n        \"location\": \"IS_A110\",\n        \"lastUpdate\": \"2025-03-05T10:37:00Z\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8090/events/2dcb62c0-70d7-460b-af26-b324d1d7fed9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"events",
+								"2dcb62c0-70d7-460b-af26-b324d1d7fed9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"ichou abdelali forth event\",\n    \"resourceIds\":[\"19100aed-0363-4f80-9679-5c1350403122\"],\n    \"uid\":\"ADE60323032342d323032352d5543412d36303334342d302d32\",\n    \"description\":\"This is a simple description\",\n    \"start\":\"2025-01-23T15:45:00+01:00\",\n    \"end\":\"2030-01-23T15:45:00+01:00\",\n    \"location\":\"Nedroma, Algeria\",\n    \"lastUpdate\":\"2024-11-26T09:51:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8090/events/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"events",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "delete resource",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/resources/19100aed-0363-4f80-9679-5c1350403122",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"resources",
+								"19100aed-0363-4f80-9679-5c1350403122"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get recource by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/resources/19100aed-0363-4f80-9679-5c1350403122",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"resources",
+								"19100aed-0363-4f80-9679-5c1350403122"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update recource",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\"ucaID\":22307379,\n\"name\":\"justin after updating KHADIDJA\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/resources/19100aed-0363-4f80-9679-5c1350403122",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"resources",
+								"19100aed-0363-4f80-9679-5c1350403122"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create resource",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ucaID\" : 26888,\n    \"name\" : \"L3 tous\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/resources/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"resources",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get recources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/resources/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"resources",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

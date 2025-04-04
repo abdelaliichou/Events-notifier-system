@@ -29,7 +29,8 @@ services:
     ports:
       - "8090:8090"
     depends_on:
-      - scheduler          
+      - scheduler        
+      - nats-server
     networks:
       - microservices_network
 
@@ -40,6 +41,7 @@ services:
     depends_on:
       - timetable
       - config  
+      - nats-server
     networks:
       - microservices_network
 
@@ -49,6 +51,7 @@ services:
       dockerfile: Dockerfile    
     depends_on:
       - config       
+      - nats-server
     networks:
       - microservices_network
 
